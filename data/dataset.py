@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 import coloredlogs, logging
-
+from DataLoader import CocoDataset
 # logging settings
 
 # Create a logger object.
@@ -25,7 +25,7 @@ annFile='{}/annotations/instances_{}.json'.format(dataDir,dataType)
 logger.warning("Loading annotations")
 coco=COCO(annFile)
 
-def get_image_and_caption(index):
+def get_image_ids(index):
     logger.warning("Generating image ids")
     # get all category ids
     catIds = coco.getCatIds()
@@ -33,9 +33,10 @@ def get_image_and_caption(index):
     # appending image ids of each category
     for id in catIds:
        imgIds += coco.getImgIds(catIds=id)
-    print(len(imgIds))
     return imgIds
     
 
     
-get_image_and_caption(1)
+imgIds = get_image_ids(1)
+dataset = CocoDataset(imgIds=imgIds,coco=coco)
+dataset.__getitem__(1)
