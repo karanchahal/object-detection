@@ -1,0 +1,1 @@
+echo 'All dependencies installed'

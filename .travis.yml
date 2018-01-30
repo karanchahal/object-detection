@@ -1,0 +1,7 @@
+language: python
+
+sudo: enabled
+
+install: sh dependencies.sh
+
+script: sh build.sh
