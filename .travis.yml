@@ -2,6 +2,6 @@ language: python
 
 sudo: enabled
 
-install: ./dependencies.sh
+install: sh dependencies.sh
 
-script: ./build.sh
+script: sh build.sh
