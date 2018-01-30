@@ -6,30 +6,35 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
+import coloredlogs, logging
 
+# logging settings
+
+# Create a logger object.
+logger = logging.getLogger(__name__)
+
+coloredlogs.install(level='DEBUG')
+coloredlogs.install(fmt='%(asctime)s,%(msecs)03d %(levelname)s %(message)s')
+# Dataset Location variables
 
 dataDir='../../coco/' # path to dataset folder
 dataType='val2014'
 annFile='{}/annotations/instances_{}.json'.format(dataDir,dataType)
 
+# Loading annotations
+logger.warning("Loading annotations")
 coco=COCO(annFile)
-cats = coco.loadCats(coco.getCatIds())
-nms=[cat['name'] for cat in cats]
 
 def get_image_and_caption(index):
-
-
-
-    # display COCO categories and supercategories
-    cats = coco.loadCats(coco.getCatIds())
-        
-    # get all images containing given categories, select one at random
-
-    catIds = coco.getCatIds(catNms=nms)
+    logger.warning("Generating image ids")
+    # get all category ids
+    catIds = coco.getCatIds()
     imgIds = []
-    print(len(catIds))
+    # appending image ids of each category
     for id in catIds:
        imgIds += coco.getImgIds(catIds=id)
+    print(len(imgIds))
+    return imgIds
     
 
     
