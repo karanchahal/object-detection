@@ -38,5 +38,6 @@ def get_image_ids(index):
 
     
 imgIds = get_image_ids(1)
+logger.warning("Generating image ids")
 dataset = CocoDataset(imgIds=imgIds,coco=coco)
 dataset.__getitem__(1)
