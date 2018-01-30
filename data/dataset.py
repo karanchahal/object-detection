@@ -20,10 +20,13 @@ coloredlogs.install(fmt='%(asctime)s,%(msecs)03d %(levelname)s %(message)s')
 dataDir='../../coco/' # path to dataset folder
 dataType='val2014'
 annFile='{}/annotations/instances_{}.json'.format(dataDir,dataType)
+annCapFile = '{}/annotations/captions_{}.json'.format(dataDir,dataType)
 
 # Loading annotations
-logger.warning("Loading annotations")
+logger.warning("Loading annotations images")
 coco=COCO(annFile)
+logger.warning("Loading annotations captions")
+coco_caps=COCO(annCapFile)
 
 def get_image_ids(index):
     logger.warning("Generating image ids")
@@ -38,6 +41,6 @@ def get_image_ids(index):
 
     
 imgIds = get_image_ids(1)
-logger.warning("Generating image ids")
-dataset = CocoDataset(imgIds=imgIds,coco=coco)
+logger.warning("Instantiating Dataset Object")
+dataset = CocoDataset(imgIds=imgIds,coco=coco,coco_caps=coco_caps)
 dataset.__getitem__(1)
