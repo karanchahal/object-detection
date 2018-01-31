@@ -52,8 +52,8 @@ dataloader = torch.utils.data.DataLoader(dataset,
                                              batch_size=4, shuffle=True,
                                              num_workers=4)
 for i,data in enumerate(dataloader):
+    logger.info("Training batch no. " + str(i) + " of size 4")
     images, captions = data['image'], data['captions']
-    print(captions[0])
-    print(captions[1])
-    break
+    if(i == 3):
+        break
 
