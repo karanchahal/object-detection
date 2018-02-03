@@ -35,9 +35,13 @@ class CocoDataset(Dataset):
         captions = [ c['caption'] for c in captions ]
         
         sample = {'image': image, 'captions': captions}
-
-        if self.transform:
+        try:
+            if self.transform:
                 sample['image'] = self.transform(image)
+                logger.error('Image of size ' + str(sample['image'].shape) + '  rescaled')
+        except:
+            logger.error('Image of size ' + str(sample['image'].shape) + ' failed to rescale')
+            return
 
         return sample
 
