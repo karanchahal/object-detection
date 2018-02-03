@@ -38,7 +38,6 @@ class CocoDataset(Dataset):
         try:
             if self.transform:
                 sample['image'] = self.transform(image)
-                logger.error('Image of size ' + str(sample['image'].shape) + '  rescaled')
         except:
             logger.error('Image of size ' + str(sample['image'].shape) + ' failed to rescale')
             return

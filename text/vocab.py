@@ -24,7 +24,9 @@ def write_to_log(sentence,filename):
     word_err_file.write(sentence + '\n')
 
 def close_log():
+    global word_err_file
     word_err_file.close()
+    word_err_file = None
 
 def collect_errors(word,filename):
     global word_errors
