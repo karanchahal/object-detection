@@ -27,7 +27,7 @@ coco=COCO(annFile)
 logger.warning("Loading annotations captions")
 coco_caps=COCO(annCapFile)
 
-def get_image_ids(index):
+def get_image_ids(index,sample=None):
     logger.warning("Generating image ids")
     # get all category ids
     catIds = coco.getCatIds()
@@ -35,6 +35,12 @@ def get_image_ids(index):
     # appending image ids of each category
     for id in catIds:
        imgIds += coco.getImgIds(catIds=id)
-    return imgIds
+
+    if sample == None:
+        # Returning the entire dataset
+        return imgIds
+    else:
+        # Returning a subset of the dataset
+        return imgIds[:sample]
     
   
