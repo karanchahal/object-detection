@@ -39,11 +39,3 @@ class Encoder(nn.Module):
         x = self.fc(x)
 
         return x
-
-
-a = torch.autograd.Variable(torch.zeros((1,3,224,224)))
-
-conv = resnet34(pretrained=True)
-model = Encoder(conv)
-b = model(a)
-print(b.size())
