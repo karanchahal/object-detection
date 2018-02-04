@@ -35,19 +35,22 @@ class CocoDataset(Dataset):
 
     def __getitem__(self, idx):
         logger.warning("Generating sample of image id: " + str(self.imgIds[idx]))
+        
+        img = self.coco.loadImgs(self.imgIds[idx])[0]
 
         capIds = self.coco_caps.getAnnIds(imgIds=img['id']);
         captions = self.coco_caps.loadAnns(capIds)
         captions = [ c['caption'] for c in captions ]
+        return {'captions':captions}
 
         sample = {'image': torch.Tensor(np.zeros((3,224,224))), 'captions': captions}
 
         try:
-            img = self.coco.loadImgs(self.imgIds[idx])[0]
             image = io.imread(img['coco_url'])
         except:
             self.write_to_log(img['coco_url'],filename=PROJECT_DIR + 'errors/image_error.log')
             return sample
+
 
         sample = {'image': image, 'captions': captions}
 
