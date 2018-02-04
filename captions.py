@@ -3,8 +3,9 @@ from data.dataset import get_image_ids,coco,coco_caps
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 from data.DataLoader import CocoDataset, RandomCrop
+from text.vocab import WordModel
 import coloredlogs, logging
-import text.vocab as vocab
+
 # logging settings
 
 # Create a logger object.
@@ -34,9 +35,12 @@ dataloader = torch.utils.data.DataLoader(
 logger.warning("Starting training loop")
 '''Training Loop'''
 
-vocab.load_model()
+word_model = WordModel()
+word_model.load_model()
 
 for i,data in enumerate(dataloader):
     logger.info("Training batch no. " + str(i) + " of size 4")
     images, captions = data['image'], data['captions']
-    vocab.create(captions)
+    word_model.build_vocab(captions)
+
+word_modal.save(filename='models/word_model.pkl')
