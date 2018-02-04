@@ -11,7 +11,9 @@ import coloredlogs, logging
 # Create a logger object.
 logger = logging.getLogger(__name__)
 
-imgIds = get_image_ids(1)
+dataset_size = 16
+
+imgIds = get_image_ids(1,sample=dataset_size)
 logger.warning("Loading Dataset")
 
 '''Dataset Loading'''
@@ -41,10 +43,7 @@ word_model = WordModel()
 for i,data in enumerate(dataloader):
     logger.info("Training batch no. " + str(i) + " of size 4")
     images, captions = data['image'], data['captions']
-    print(len(captions))
-    print(len(captions[0]))
-    break
-    word_model.build_vocab(captions)
+    # word_model.build_vocab(captions)
     
 
-word_model.save(filename='models/word_model.pkl')
+# word_model.save(filename='models/word_model.pkl')
