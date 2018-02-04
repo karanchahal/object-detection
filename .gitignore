@@ -1,2 +1,4 @@
-.*/__pycache__
-.*/*.log
+/*/__pycache__
+*/*.log
+/errors
+*.pkl

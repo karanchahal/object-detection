@@ -5,6 +5,8 @@ import coloredlogs, logging
 import numpy as np
 logger = logging.getLogger(__name__)
 
+PROJECT_DIR = '/home/karan/attention-caption/'
+
 class CocoDataset(Dataset):
     """Face Landmarks dataset."""
 
@@ -22,22 +24,45 @@ class CocoDataset(Dataset):
         self.imgIds = imgIds
         self.transform = transform
 
+    def write_to_log(self,sentence,filename):
+        logger.warning(str(sentence) + ' writing to log')
+        self.word_err_file = open(filename, "a+")
+        self.word_err_file.write(sentence + '\n')
+        
+
     def __len__(self):
         return len(self.imgIds)
 
     def __getitem__(self, idx):
         logger.warning("Generating sample of image id: " + str(self.imgIds[idx]))
+        
         img = self.coco.loadImgs(self.imgIds[idx])[0]
-        image = io.imread(img['coco_url'])
 
         capIds = self.coco_caps.getAnnIds(imgIds=img['id']);
         captions = self.coco_caps.loadAnns(capIds)
         captions = [ c['caption'] for c in captions ]
-        
+        return {'captions':captions}
+
+        sample = {'image': torch.Tensor(np.zeros((3,224,224))), 'captions': captions}
+
+        try:
+            image = io.imread(img['coco_url'])
+        except:
+            self.write_to_log(img['coco_url'],filename=PROJECT_DIR + 'errors/image_error.log')
+            return sample
+
+
         sample = {'image': image, 'captions': captions}
 
-        if self.transform:
+        try:
+            if self.transform:
                 sample['image'] = self.transform(image)
+        except:
+            # Temporary to get all vocab characteristics
+            logger.error('Image of size ' + str(sample['image'].shape) + ' failed to rescale')
+            sample = {'image': image, 'captions': captions}
+            sample['image'] = torch.Tensor(np.zeros((3,224,224)))
+            self.write_to_log(img['coco_url'],filename=PROJECT_DIR + 'errors/image_error.log')
 
         return sample
 
