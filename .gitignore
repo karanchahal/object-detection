@@ -2,4 +2,4 @@
 */*.log
 /errors
 *.pkl
-/models
+/model_logs

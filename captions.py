@@ -43,7 +43,9 @@ word_model = WordModel()
 for i,data in enumerate(dataloader):
     logger.info("Training batch no. " + str(i) + " of size 4")
     images, captions = data['image'], data['captions']
+
+    encoder()
     # word_model.build_vocab(captions)
     
 
-# word_model.save(filename='models/word_model.pkl')
+# word_model.save(filename='model_logs/word_model.pkl')
