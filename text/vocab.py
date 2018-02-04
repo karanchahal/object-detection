@@ -20,6 +20,7 @@ class Vocab:
         self.word2id['<EOS>'] = 1
 
         self.id = 2
+        self.examples = 0
 
     def add(self,word):
         if word not in self.word2id:
@@ -48,7 +49,6 @@ class WordModel:
         logger.warning("Loading word model")
         self.word_model = gensim.models.KeyedVectors.load_word2vec_format('/home/karan/embeddings/lex.vectors', binary=False)
 
-
     def write_to_log(self,sentence,filename):
         logger.warning(str(sentence) + ' writing to log')
         self.word_err_file = open(filename, "a+")
@@ -65,17 +65,34 @@ class WordModel:
 
     def build_vocab(self,captions):
         logger.warning("Building vocabulary")
-        for batch in captions:
-            for caption in batch:
+        remove = 0
+
+        for c in range(len(captions[0])):
+            for d in range(len(captions)):
+
+                caption = captions[d][c]
+
                 tokenizer = RegexpTokenizer(r'\w+')
                 tokens = tokenizer.tokenize(caption)
+
                 for word in tokens:
                     word = word.lower()
                     if word not in self.word_model:
+                        remove = 1
                         logger.error(str(word) + ' does not exist')
                         self.collect_errors(word,filename=PROJECT_DIR + '/errors/word_error.log')
+                        break
                     else:
                         self.vocab.add(word)
+
+                if remove == 1:
+                    break
+            if remove == 1:
+                remove = 0
+            else:
+                self.vocab.examples += 1
+                    
     
     def save(self,filename):
-        pickle.dump(self,open(filename,"wb"))
+        self.word_model = None
+        pickle.dump(self.vocab,open(filename,"wb"))

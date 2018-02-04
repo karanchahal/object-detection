@@ -36,11 +36,15 @@ logger.warning("Starting training loop")
 '''Training Loop'''
 
 word_model = WordModel()
-word_model.load_model()
+# word_model.load_model()
 
 for i,data in enumerate(dataloader):
     logger.info("Training batch no. " + str(i) + " of size 4")
     images, captions = data['image'], data['captions']
+    print(len(captions))
+    print(len(captions[0]))
+    break
     word_model.build_vocab(captions)
+    
 
-word_modal.save(filename='models/word_model.pkl')
+word_model.save(filename='models/word_model.pkl')
