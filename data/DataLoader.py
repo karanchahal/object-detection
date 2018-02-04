@@ -25,7 +25,7 @@ class CocoDataset(Dataset):
         self.transform = transform
 
     def write_to_log(self,sentence,filename):
-        logger.warning(str(sentence) + ' writing to log')
+        logger.error(str(sentence) + ' writing to log')
         self.word_err_file = open(filename, "a+")
         self.word_err_file.write(sentence + '\n')
         
@@ -41,7 +41,6 @@ class CocoDataset(Dataset):
         capIds = self.coco_caps.getAnnIds(imgIds=img['id']);
         captions = self.coco_caps.loadAnns(capIds)
         captions = [ c['caption'] for c in captions ]
-        return {'captions':captions}
 
         sample = {'image': torch.Tensor(np.zeros((3,224,224))), 'captions': captions}
 
@@ -57,7 +56,8 @@ class CocoDataset(Dataset):
         try:
             if self.transform:
                 sample['image'] = self.transform(image)
-        except:
+        except Exception as e:
+            print(e)
             # Temporary to get all vocab characteristics
             logger.error('Image of size ' + str(sample['image'].shape) + ' failed to rescale')
             sample = {'image': image, 'captions': captions}
@@ -83,6 +83,12 @@ class RandomCrop(object):
             self.output_size = output_size
 
     def __call__(self, image):
+    
+        if len(image.shape) < 3:
+            image = self.add_channels(image)
+        
+        if image.shape[0] < self.output_size[0] or image.shape[1] < self.output_size[1]:
+            image = self.rescale(image)
 
         h, w = image.shape[:2]
         new_h, new_w = self.output_size
@@ -94,3 +100,14 @@ class RandomCrop(object):
                       left: left + new_w]
 
         return image
+
+    def add_channels(self,image):
+        logger.warning('Adding channels to grayscale image')
+        image = np.stack((image,)*3)
+        return np.transpose(image,(1,2,0))
+
+    def rescale(self,image):
+        logger.warning('Rescaling for small images')
+        logger.warning(str(sentence) + ' writing to log')
+        return image.reshape((250,250,3))
+    
