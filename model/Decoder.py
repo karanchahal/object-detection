@@ -1,4 +1,3 @@
-from torchvision.models.resnet import resnet34
 import torch.nn as nn
 from Encoder import Encoder
 from torch.autograd import Variable
@@ -14,7 +13,7 @@ class Decoder(nn.Module):
         self.batch_size = batch_size
 
         self.embedding = nn.Embedding(vocab_size,embed_size)
-        self.gru = nn.GRU(hidden_size, hidden_size, num_layers)
+        self.gru = nn.GRU(hidden_size, hidden_size, num_layers=num_layers,batch_first=True)
         self.fc = nn.Linear(hidden_size,vocab_size)
 
         self.hidden = self.initHidden()
@@ -31,22 +30,12 @@ class Decoder(nn.Module):
 
     def forward(self,x):
         x = self.embedding(x)
+        print(x.size())
         x, self.hidden = self.gru(x,self.hidden)
+        print(x.size())
         x = self.fc(x)
+        print(x.size())
         return x
     
     def initHidden(self):
         return Variable(torch.zeros(self.num_layers,self.batch_size,self.hidden_size))
-
-
-a = torch.autograd.Variable(torch.zeros((1,3,224,224)))
-conv = resnet34(pretrained=True)
-enc = Encoder(conv)
-b = enc(a)
-print(b.size())
-batch_size = 2
-dec = Decoder(vocab_size=10000,batch_size=batch_size)
-c = torch.zeros((batch_size,1)).long()
-c = Variable(c)
-c = dec(c)
-print(c.size())
