@@ -31,8 +31,11 @@ class Vocab:
     def word(self,id):
         return self.id2word[id]
     
-    def id(self,word):
-        return self.word2id[word]
+    def idx(self,word):
+        if word in self.word2id:
+            return self.word2id[word]
+        else:
+            return self.word2id['<EOS>']
     
     def length():
         return self.id
@@ -92,7 +95,26 @@ class WordModel:
             else:
                 self.vocab.examples += 1
                     
-    
+    def parse(self,captions):
+        parsed_captions = []
+        for c in range(len(captions[0])):
+            example_captions = []
+            for d in range(len(captions)):
+                
+                caption = captions[d][c]
+                tokenizer = RegexpTokenizer(r'\w+')
+                tokens = tokenizer.tokenize(caption)
+                ids = []
+                for word in tokens:
+                    word = word.lower()
+                    ids.append(self.vocab.idx(word))
+                example_captions.append(ids)   
+            parsed_captions.append(example_captions)
+        
+        return parsed_captions
+
     def save(self,filename):
-        self.word_model = None
         pickle.dump(self.vocab,open(filename,"wb"))
+    
+    def load(self,filename):
+        self.vocab = pickle.load(open(filename,"rb"))
