@@ -1,4 +1,5 @@
 from nltk.tokenize.casual import TweetTokenizer
+import pickle
 
 tokenizer = TweetTokenizer()
 
@@ -113,11 +114,3 @@ for i in ayo_questions:
 
 print(len(main_a_questions))
 print(len(main_k_answers))
-
-pickle.dump(main_a_questions,open('a_questions.pkl','wb'))
-
-pickle.dump(main_k_answers,open('main_k_answers.pkl','wb'))
-
-pickle.dump(vocab,open('vocab.pkl','wb'))
-
-
