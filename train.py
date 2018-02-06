@@ -56,12 +56,13 @@ for i,data in enumerate(dataloader):
     images, captions = Variable(data['image']), data['captions']
 
     captions = word_model.parse(captions)
+    pad(captions)
     c = captions[0][0]
     out = encoder(images)
     # decoder(out)
     for ci in c:
         print(word_model.vocab.word(ci))
-    
+    inp = decoder(inp)
     print(out.size())
     break
     
