@@ -3,3 +3,4 @@
 /errors
 *.pkl
 /model_logs
+*.tar
