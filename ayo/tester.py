@@ -592,7 +592,7 @@ attn_decoder1 = AttnDecoderRNN(hidden_size,vocab_length , dropout_p=0.1)
 print(MAX_LENGTH, "is maximum length of sentence")
 print('Vocab size is ', vocab_length)
 print('Number of examples in one epoch are', len(main_a_questions))
-print('NUmber of Unknown words are ', vocab.unknowns)
+print('Number of Unknown words are ', vocab.unknowns)
 
 print(use_cuda)
 

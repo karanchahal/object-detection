@@ -38,26 +38,12 @@ logger.warning("Starting training loop")
 '''Training Loop'''
 
 word_model = WordModel()
-word_model.load(filename="model_logs/word_model.pkl")
-print('Number of examples', word_model.vocab.examples)
-print('Number of words', len(word_model.vocab.id2word))
-
+word_model.load_model()
 
 for i,data in enumerate(dataloader):
     logger.info("Training batch no. " + str(i) + " of size 4")
-    # images, captions = data['image'], data['captions']
     captions = data['captions']
-    print(len(captions))
-    captions = word_model.parse(captions)
-    print(len(captions))
-    
-# word_model.load_model()
-
-# for i,data in enumerate(dataloader):
-#     logger.info("Training batch no. " + str(i) + " of size 4")
-#     # images, captions = data['image'], data['captions']
-#     captions = data['captions']
-#     word_model.build_vocab(captions)
+    word_model.build_vocab(captions)
     
 
-# word_model.save(filename='model_logs/word_model.pkl')
+word_model.save(filename='model_logs/word_model.pkl')

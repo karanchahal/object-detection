@@ -4,7 +4,10 @@ from torch.autograd import Variable
 import torch
 
 class Decoder(nn.Module):
-    
+    ''' Simple GRU Decoder, converts words to embeddings if not using word embeddings
+        and then runs them through a 3 layer GRU cell, outputs a probability of the vocabulary,
+        adds the conv feature map as the hidden state
+    '''
     def __init__(self,vocab_size,embed_size=300,hidden_size=300,num_layers=3,batch_size=1):
         super(Decoder, self).__init__()
 
