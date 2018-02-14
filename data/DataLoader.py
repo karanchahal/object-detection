@@ -41,7 +41,7 @@ class CocoDataset(Dataset):
         capIds = self.coco_caps.getAnnIds(imgIds=img['id']);
         captions = self.coco_caps.loadAnns(capIds)
         captions = [ c['caption'] for c in captions ]
-        # return {'captions':captions}
+        return {'captions':captions}
         sample = {'image': torch.Tensor(np.zeros((3,224,224))), 'captions': captions}
 
         try:

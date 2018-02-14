@@ -16,10 +16,12 @@ class Vocab:
 
         self.id2word.append('<SOS>')
         self.id2word.append('<EOS>')
+        self.id2word.append('<UNK>')
         self.word2id['<SOS>'] = 0
         self.word2id['<EOS>'] = 1
+        self.word2id['<UNK>'] = 2
 
-        self.id = 2
+        self.id = 3
         self.examples = 0
 
     def add(self,word):
@@ -35,7 +37,7 @@ class Vocab:
         if word in self.word2id:
             return self.word2id[word]
         else:
-            return self.word2id['<EOS>']
+            return self.word2id['<UNK>']
     
     def length():
         return self.id
@@ -100,7 +102,6 @@ class WordModel:
         for c in range(len(captions[0])):
             example_captions = []
             for d in range(len(captions)):
-                
                 caption = captions[d][c]
                 tokenizer = RegexpTokenizer(r'\w+')
                 tokens = tokenizer.tokenize(caption)
@@ -108,6 +109,8 @@ class WordModel:
                 for word in tokens:
                     word = word.lower()
                     ids.append(self.vocab.idx(word))
+                ids.append(self.vocab.idx('<EOS>'))
+                
                 example_captions.append(ids)   
             parsed_captions.append(example_captions)
         
