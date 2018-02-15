@@ -27,6 +27,19 @@ coco=COCO(annFile)
 logger.warning("Loading annotations captions")
 coco_caps=COCO(annCapFile)
 
+
+def get_ann_ids(sample=None):
+    logger.warning("Generating annotation ids")
+    # get all annotation ids
+    annIds = list(coco_caps.anns.keys())
+   
+    if sample == None:
+        # Returning the entire dataset
+        return annIds
+    else:
+        # Returning a subset of the dataset
+        return ann_ids[:sample]
+
 def get_image_ids(sample=None):
     logger.warning("Generating image ids")
     # get all category ids

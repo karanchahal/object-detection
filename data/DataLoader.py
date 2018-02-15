@@ -1,3 +1,4 @@
+import os
 import torch
 from torch.utils.data import Dataset, DataLoader
 from skimage import io, transform
@@ -6,22 +7,25 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 PROJECT_DIR = '/home/karan/attention-caption/'
+DATASET_DIR = '/home/karan/coco/images/'
 
 class CocoDataset(Dataset):
     """Face Landmarks dataset."""
 
-    def __init__(self, imgIds, coco, coco_caps, transform=None):
+    def __init__(self, annIds, coco, coco_caps, word_model, transform=None):
         """
         Args:
-            imgIds (string): image ids of the images.
+            annIds (string): annotation ids of the captions.
             coco (object): Coco image data helper object.
             coco_caps (object): Coco caption data helper object.
+            word_model (object): Vocab object to get ids of words
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
         self.coco = coco
         self.coco_caps = coco_caps
-        self.imgIds = imgIds
+        self.annIds = annIds
+        self.word_model = word_model
         self.transform = transform
 
     def write_to_log(self,sentence,filename):
@@ -31,40 +35,40 @@ class CocoDataset(Dataset):
         
 
     def __len__(self):
-        return len(self.imgIds)
+        return len(self.annIds)
 
     def __getitem__(self, idx):
-        logger.warning("Generating sample of image id: " + str(self.imgIds[idx]))
+        logger.warning("Generating sample of annotation id: " + str(self.annIds[idx]))
         
-        img = self.coco.loadImgs(self.imgIds[idx])[0]
-
-        capIds = self.coco_caps.getAnnIds(imgIds=img['id']);
-        captions = self.coco_caps.loadAnns(capIds)
-        captions = [ c['caption'] for c in captions ]
-        return {'captions':captions}
-        sample = {'image': torch.Tensor(np.zeros((3,224,224))), 'captions': captions}
+        ann_id = self.annIds[idx]
+        caption = self.coco_caps.anns[ann_id]['caption']
+        img_id = self.coco_caps.anns[ann_id]['image_id']
+        path = self.coco_caps.loadImgs(img_id)[0]['coco_url']
+       
+        # Create caption as list of ids
+        caption = self.word_model.parse(caption)
+        # Create image
+        image = torch.Tensor(np.zeros((3,224,224)))
 
         try:
-            image = io.imread(img['coco_url'])
-        except:
-            self.write_to_log(img['coco_url'],filename=PROJECT_DIR + 'errors/image_error.log')
-            return sample
-
-
-        sample = {'image': image, 'captions': captions}
-
+            image = io.imread(path)
+        except Exception as e:
+            print(e)
+            self.write_to_log(path,filename=PROJECT_DIR + 'errors/image_error.log')
+            return image,caption
+            
         try:
             if self.transform:
-                sample['image'] = self.transform(image)
+                image = self.transform(image)
         except Exception as e:
             print(e)
             # Temporary to get all vocab characteristics
-            logger.error('Image of size ' + str(sample['image'].shape) + ' failed to rescale')
-            sample = {'image': image, 'captions': captions}
-            sample['image'] = torch.Tensor(np.zeros((3,224,224)))
-            self.write_to_log(img['coco_url'],filename=PROJECT_DIR + 'errors/image_error.log')
+            logger.error('Image of size ' + str(image.shape) + ' failed to rescale')
+            image = torch.Tensor(np.zeros((3,224,224)))
+            self.write_to_log(path,filename=PROJECT_DIR + 'errors/image_error.log')
+        
 
-        return sample
+        return image,caption
 
 class RandomCrop(object):
     """Crop randomly the image in a sample.
@@ -83,12 +87,16 @@ class RandomCrop(object):
             self.output_size = output_size
 
     def __call__(self, image):
-    
+        
         if len(image.shape) < 3:
+            logger.error('Converting to RGB from grayscale')
             image = self.add_channels(image)
+            print(image.shape)
         
         if image.shape[0] < self.output_size[0] or image.shape[1] < self.output_size[1]:
+            logger.error('Rescaling image to be bigger')
             image = self.rescale(image)
+            print(image.shape)
 
         h, w = image.shape[:2]
         new_h, new_w = self.output_size
@@ -110,4 +118,22 @@ class RandomCrop(object):
         logger.warning('Rescaling for small images')
         logger.warning(str(sentence) + ' writing to log')
         return image.reshape((250,250,3))
+
+def collate_fn(data):
+    ''' input: tuple of images and captions
+        output: images tensor of shape (3,224,224), captions of padded length,lengths
+    '''
+    data.sort(key=lambda x: len(x[1]), reverse=True)
+    images, captions = zip(*data)
     
+    # Merge images
+    images = torch.stack(images,0)
+    
+    #Merge captions
+    lengths = [len(cap) for cap in captions]
+    captions = torch.zeros(len(captions), max(lengths)).long() # adding padding token to everything
+    for i,cap in enumerate(captions):
+        end = lengths[i]
+        captions[i,:end] = cap[:end]
+    
+    return images,captions,lengths
