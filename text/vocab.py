@@ -3,6 +3,8 @@ import nltk
 import pickle
 from nltk.tokenize import RegexpTokenizer
 import coloredlogs, logging
+import torch
+import numpy as np
 
 # Create a logger object.
 logger = logging.getLogger(__name__)
@@ -50,7 +52,7 @@ class WordModel:
         self.word_errors = {}
         self.vocab = Vocab()
 
-    def load_model(self):
+    def load_embeddings(self):
         logger.warning("Loading word model")
         self.word_model = gensim.models.KeyedVectors.load_word2vec_format('/home/karan/embeddings/lex.vectors', binary=False)
 
@@ -96,26 +98,31 @@ class WordModel:
                 remove = 0
             else:
                 self.vocab.examples += 1
-                    
-    def parse(self,captions):
-        parsed_captions = []
-        for c in range(len(captions[0])):
-            example_captions = []
-            for d in range(len(captions)):
-                caption = captions[d][c]
-                tokenizer = RegexpTokenizer(r'\w+')
-                tokens = tokenizer.tokenize(caption)
-                ids = []
-                for word in tokens:
-                    word = word.lower()
-                    ids.append(self.vocab.idx(word))
-                ids.append(self.vocab.idx('<EOS>'))
-                
-                example_captions.append(ids)   
-            parsed_captions.append(example_captions)
-        
-        return parsed_captions
+    
+    def tensor(self,array):
+        return torch.LongTensor(array)
 
+    def parse(self,caption):
+        tokenizer = RegexpTokenizer(r'\w+')
+        tokens = tokenizer.tokenize(caption)
+        ids = []
+        for word in tokens:
+            word = word.lower()
+            ids.append(self.vocab.idx(word))
+        ids.append(self.vocab.idx('<EOS>'))
+        ids = self.tensor(ids)
+        return ids
+
+    def captionloader(self,captions):
+        num_examples = []
+        for i in range(len(captions)):
+            batch_captions = []
+            for j in range(len(captions[i])):
+                ids = self.parse(captions[i][j])
+                batch_captions.append(ids)
+            num_examples.append(batch_captions)
+        return num_examples
+            
     def save(self,filename):
         pickle.dump(self.vocab,open(filename,"wb"))
     

@@ -41,26 +41,23 @@ class CocoDataset(Dataset):
         capIds = self.coco_caps.getAnnIds(imgIds=img['id']);
         captions = self.coco_caps.loadAnns(capIds)
         captions = [ c['caption'] for c in captions ]
-        return {'captions':captions}
-        sample = {'image': torch.Tensor(np.zeros((3,224,224))), 'captions': captions}
 
+        sample = {'image': torch.Tensor(np.zeros((3,224,224))), 'captions': captions}
+        
         try:
-            image = io.imread(img['coco_url'])
-        except:
+            sample['image'] = io.imread(img['coco_url'])
+        except Exception as e:
+            print(e)
             self.write_to_log(img['coco_url'],filename=PROJECT_DIR + 'errors/image_error.log')
             return sample
-
-
-        sample = {'image': image, 'captions': captions}
-
+            
         try:
             if self.transform:
-                sample['image'] = self.transform(image)
+                sample['image'] = self.transform(sample['image'])
         except Exception as e:
             print(e)
             # Temporary to get all vocab characteristics
             logger.error('Image of size ' + str(sample['image'].shape) + ' failed to rescale')
-            sample = {'image': image, 'captions': captions}
             sample['image'] = torch.Tensor(np.zeros((3,224,224)))
             self.write_to_log(img['coco_url'],filename=PROJECT_DIR + 'errors/image_error.log')
 
@@ -83,12 +80,14 @@ class RandomCrop(object):
             self.output_size = output_size
 
     def __call__(self, image):
-    
+        
         if len(image.shape) < 3:
             image = self.add_channels(image)
+            print(image.shape)
         
         if image.shape[0] < self.output_size[0] or image.shape[1] < self.output_size[1]:
             image = self.rescale(image)
+            print(image.shape)
 
         h, w = image.shape[:2]
         new_h, new_w = self.output_size
