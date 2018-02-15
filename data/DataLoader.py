@@ -10,18 +10,20 @@ PROJECT_DIR = '/home/karan/attention-caption/'
 class CocoDataset(Dataset):
     """Face Landmarks dataset."""
 
-    def __init__(self, imgIds, coco, coco_caps, transform=None):
+    def __init__(self, annIds, coco, coco_caps, vocab, transform=None):
         """
         Args:
-            imgIds (string): image ids of the images.
+            annIds (string): annotation ids of the captions.
             coco (object): Coco image data helper object.
             coco_caps (object): Coco caption data helper object.
+            vocab (object): Vocab object to get ids of words
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
         self.coco = coco
         self.coco_caps = coco_caps
-        self.imgIds = imgIds
+        self.annIds = imgIds
+        self.vocab = vocab
         self.transform = transform
 
     def write_to_log(self,sentence,filename):
@@ -36,20 +38,26 @@ class CocoDataset(Dataset):
     def __getitem__(self, idx):
         logger.warning("Generating sample of image id: " + str(self.imgIds[idx]))
         
-        img = self.coco.loadImgs(self.imgIds[idx])[0]
+        ann_id = self.annIds[idx]
+        caption = self.coco.anns[ann_id]['caption']
+        img_id = coco.anns[ann_id]['image_id']
 
         capIds = self.coco_caps.getAnnIds(imgIds=img['id']);
         captions = self.coco_caps.loadAnns(capIds)
         captions = [ c['caption'] for c in captions ]
-
-        sample = {'image': torch.Tensor(np.zeros((3,224,224))), 'captions': captions}
+        path = coco.loadImgs(img_id)[0]['coco_url']
         
+        # Create caption as list of ids
+
+        # Create image
+        image = torch.Tensor(np.zeros((3,224,224)))
+
         try:
-            sample['image'] = io.imread(img['coco_url'])
+            image = io.imread(os.path.join(DATASET_PATH, path)).convert('RGB'))
         except Exception as e:
             print(e)
             self.write_to_log(img['coco_url'],filename=PROJECT_DIR + 'errors/image_error.log')
-            return sample
+            return image,caption
             
         try:
             if self.transform:
@@ -61,7 +69,7 @@ class CocoDataset(Dataset):
             sample['image'] = torch.Tensor(np.zeros((3,224,224)))
             self.write_to_log(img['coco_url'],filename=PROJECT_DIR + 'errors/image_error.log')
 
-        return sample
+        return sample['image'],sample['captions']
 
 class RandomCrop(object):
     """Crop randomly the image in a sample.
@@ -109,4 +117,17 @@ class RandomCrop(object):
         logger.warning('Rescaling for small images')
         logger.warning(str(sentence) + ' writing to log')
         return image.reshape((250,250,3))
-    
+
+def collate_fn(data):
+    ''' input: tuple of images and captions
+        output: images tensor of shape (3,224,224), captions of padded length,lengths
+    '''
+    images, captions = zip(*data)
+    print(len(captions))
+    # Merge images
+    images = torch.stack(images,0)
+    print(images.size())
+    #Merge captions
+    lengths = [len(c) for c in cap for cap in captions]
+    captions = torch.zeros(len(captions))
+    return images
