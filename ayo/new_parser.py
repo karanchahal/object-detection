@@ -596,18 +596,17 @@ print('NUmber of Unknown words are ', vocab.unknowns)
 
 print(use_cuda)
 
+
+encoder1.load_state_dict(torch.load('./encoder.tar'))
+attn_decoder1.load_state_dict(torch.load('./decoder.tar'))
+
+
 if use_cuda:
     encoder1 = encoder1.cuda()
     attn_decoder1 = attn_decoder1.cuda()
 
-trainIters(encoder1, attn_decoder1,main_a_questions,main_k_answers, 10, print_every=100,learning_rate=0.01)
-evaluateRandomly(encoder1,main_a_questions,main_k_answers, attn_decoder1)
 
-torch.save(encoder1.state_dict(), 'encoder.tar')
-torch.save(attn_decoder1.state_dict(),'decoder.tar')
-
-
-trainIters(encoder1, attn_decoder1,main_a_questions,main_k_answers, 20, print_every=100,learning_rate=0.001)
+trainIters(encoder1, attn_decoder1,main_a_questions,main_k_answers, 20, print_every=100,learning_rate=0.0001)
 evaluateRandomly(encoder1,main_a_questions,main_k_answers, attn_decoder1)
 
 torch.save(encoder1.state_dict(), 'encoder.tar')
@@ -618,9 +617,3 @@ evaluateRandomly(encoder1,main_a_questions,main_k_answers, attn_decoder1)
 
 torch.save(encoder1.state_dict(), './encoder.tar')
 torch.save(attn_decoder1.state_dict(),'./decoder.tar')
-
-trainIters(encoder1, attn_decoder1,main_a_questions,main_k_answers, 20, print_every=100,learning_rate=0.001)
-evaluateRandomly(encoder1,main_a_questions,main_k_answers, attn_decoder1)
-
-torch.save(encoder1.state_dict(), 'encoder.tar')
-torch.save(attn_decoder1.state_dict(),'decoder.tar')
