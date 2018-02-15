@@ -31,7 +31,7 @@ coco_caps=COCO(annCapFile)
 def get_ann_ids(sample=None):
     logger.warning("Generating annotation ids")
     # get all annotation ids
-    annIds = coco.anns.keys()
+    annIds = list(coco_caps.anns.keys())
    
     if sample == None:
         # Returning the entire dataset
