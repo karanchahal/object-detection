@@ -16,14 +16,17 @@ class Vocab:
         self.id2word = []
         self.word2id = {}
 
+        self.id2word.append('<PAD>')
         self.id2word.append('<SOS>')
         self.id2word.append('<EOS>')
         self.id2word.append('<UNK>')
-        self.word2id['<SOS>'] = 0
-        self.word2id['<EOS>'] = 1
-        self.word2id['<UNK>'] = 2
+        
+        self.word2id['<PAD>'] = 0
+        self.word2id['<SOS>'] = 1
+        self.word2id['<EOS>'] = 2
+        self.word2id['<UNK>'] = 3
 
-        self.id = 3
+        self.id = 4
         self.examples = 0
 
     def add(self,word):

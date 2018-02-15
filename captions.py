@@ -28,6 +28,7 @@ image_transform = transforms.Compose([
 dataset = CocoDataset(annIds=annIds,
                     coco=coco,
                     coco_caps=coco_caps,
+                    word_model=word_model,
                     transform=image_transform
                 )
 dataloader = torch.utils.data.DataLoader(
@@ -44,8 +45,10 @@ logger.warning("Starting training loop")
 print('Number of examples', word_model.vocab.examples)
 print('Number of words', len(word_model.vocab.id2word))
 
-for i,images in enumerate(dataloader):
+for i,data in enumerate(dataloader):
     logger.info("Training batch no. " + str(i) + " of size 4")
+    images,captions,lengths = data
+    print(captions.size())
     # images, captions = data
     # for j,caption_batch in enumerate(word_model.captionloader(captions)):
     #     print(j)
