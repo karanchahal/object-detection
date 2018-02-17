@@ -40,7 +40,7 @@ class CocoDataset(Dataset):
         return len(self.annIds)
 
     def __getitem__(self, idx):
-        logger.warning("Generating sample of annotation id: " + str(self.annIds[idx]))
+        # logger.warning("Generating sample of annotation id: " + str(self.annIds[idx]))
         
         ann_id = self.annIds[idx]
         caption = self.coco_caps.anns[ann_id]['caption']

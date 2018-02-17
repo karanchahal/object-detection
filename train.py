@@ -83,9 +83,9 @@ for i,data in enumerate(dataloader):
 
     features = encoder(images)
     outputs = decoder(features,captions,lengths)
-    print(outputs.size())
-    print(targets.size())
     loss = criterion(outputs,targets)
-    print(loss[0].data)
+
+    if i%100 == 0:
+        logger.info("Loss is " + str(loss.data[0]))
     loss.backward()
     optimizer.step()
