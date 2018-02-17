@@ -98,12 +98,10 @@ class RandomCrop(object):
         if len(image.shape) < 3:
             logger.error('Converting to RGB from grayscale')
             image = self.add_channels(image)
-            print(image.shape)
         
         if image.shape[0] < self.output_size[0] or image.shape[1] < self.output_size[1]:
             logger.error('Rescaling image to be bigger')
             image = self.rescale(image)
-            print(image.shape)
 
         h, w = image.shape[:2]
         new_h, new_w = self.output_size
@@ -123,7 +121,6 @@ class RandomCrop(object):
 
     def rescale(self,image):
         logger.warning('Rescaling for small images')
-        logger.warning(str(sentence) + ' writing to log')
         return image.reshape((250,250,3))
 
 def collate_fn(data):
