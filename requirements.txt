@@ -3,5 +3,4 @@ torchvision
 nltk
 gensim
 numpy
-pycocotools
 cython
