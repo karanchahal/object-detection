@@ -8,7 +8,7 @@ import numpy as np
 
 # Create a logger object.
 logger = logging.getLogger(__name__)
-PROJECT_DIR = '/home/karan/attention-caption/'
+PROJECT_DIR = './'
 use_cuda = torch.cuda.is_available()
 
 class Vocab:
@@ -58,7 +58,7 @@ class WordModel:
 
     def load_embeddings(self):
         logger.warning("Loading word model")
-        self.word_model = gensim.models.KeyedVectors.load_word2vec_format('/home/karan/embeddings/lex.vectors', binary=False)
+        self.word_model = gensim.models.KeyedVectors.load_word2vec_format('lex.vectors', binary=False)
 
     def write_to_log(self,sentence,filename):
         logger.warning(str(sentence) + ' writing to log')
