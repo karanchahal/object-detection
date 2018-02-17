@@ -4,15 +4,17 @@ from torch.utils.data import Dataset, DataLoader
 from skimage import io, transform
 import coloredlogs, logging
 import numpy as np
+from torch.nn.utils.rnn import pack_padded_sequence
 logger = logging.getLogger(__name__)
 
 PROJECT_DIR = '/home/karan/attention-caption/'
 DATASET_DIR = '/home/karan/coco/images/'
+use_cuda = torch.cuda.is_available()
 
 class CocoDataset(Dataset):
     """Face Landmarks dataset."""
 
-    def __init__(self, annIds, coco, coco_caps, word_model, transform=None):
+    def __init__(self, annIds, coco, coco_caps, word_model=None, transform=None,create_vocab=False):
         """
         Args:
             annIds (string): annotation ids of the captions.
@@ -27,6 +29,7 @@ class CocoDataset(Dataset):
         self.annIds = annIds
         self.word_model = word_model
         self.transform = transform
+        self.create_vocab = create_vocab
 
     def write_to_log(self,sentence,filename):
         logger.error(str(sentence) + ' writing to log')
@@ -45,8 +48,13 @@ class CocoDataset(Dataset):
         img_id = self.coco_caps.anns[ann_id]['image_id']
         path = self.coco_caps.loadImgs(img_id)[0]['coco_url']
        
+        # create vocab
+        if self.create_vocab:
+            return caption
+
         # Create caption as list of ids
         caption = self.word_model.parse(caption)
+
         # Create image
         image = torch.Tensor(np.zeros((3,224,224)))
 
@@ -130,10 +138,13 @@ def collate_fn(data):
     images = torch.stack(images,0)
     
     #Merge captions
+    
     lengths = [len(cap) for cap in captions]
-    captions = torch.zeros(len(captions), max(lengths)).long() # adding padding token to everything
+
+    targets = torch.zeros(len(captions), max(lengths)).long() # adding padding token to everything
+    
     for i,cap in enumerate(captions):
         end = lengths[i]
-        captions[i,:end] = cap[:end]
+        targets[i,:end] = cap[:end]
     
-    return images,captions,lengths
+    return images,targets,lengths

@@ -1,68 +1,91 @@
 import torch
-from torch.autograd import Variable
-from data.dataset import get_image_ids,coco,coco_caps
+from data.dataset import get_image_ids,coco,coco_caps,get_ann_ids
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
-from data.DataLoader import CocoDataset, RandomCrop
+from data.DataLoader import CocoDataset, RandomCrop, collate_fn
 from text.vocab import WordModel
 import coloredlogs, logging
-from model.Encoder import Encoder
+from torch.autograd import Variable
+from torch.nn.utils.rnn import pack_padded_sequence
 from torchvision.models.resnet import resnet34
+from model.Encoder import Encoder
+from model.Decoder import Decoder
+import torch.nn as nn
 # logging settings
 
 # Create a logger object.
 logger = logging.getLogger(__name__)
 
-dataset_size = 16
+use_cuda = torch.cuda.is_available()
 
+batch_size = 4
+dataset_size = 16
+annIds = get_ann_ids()
 imgIds = get_image_ids()
 logger.warning("Loading Dataset")
 
 '''Dataset Loading'''
 
+word_model = WordModel()
+word_model.load(filename="model_logs/word_model.pkl")
+
 image_transform = transforms.Compose([
         RandomCrop(224),
         transforms.ToTensor()
     ])
-dataset = CocoDataset(imgIds=imgIds,
+dataset = CocoDataset(annIds=annIds,
                     coco=coco,
                     coco_caps=coco_caps,
+                    word_model=word_model,
                     transform=image_transform
                 )
 dataloader = torch.utils.data.DataLoader(
                                         dataset,
-                                        batch_size=4,
+                                        batch_size=batch_size,
                                         shuffle=True,
-                                        num_workers=4
+                                        num_workers=4,
+                                        collate_fn=collate_fn
                                     )
 
 logger.warning("Starting training loop")
 '''Training Loop'''
 
-word_model = WordModel()
-word_model.load(filename='model_logs/word_model.pkl')
+print('Number of examples', word_model.vocab.examples)
+print('Number of words', len(word_model.vocab.id2word))
+
+# Loading the model
+
+logger.warning("Loading the model")
 conv = resnet34(pretrained=True)
+
+
 encoder = Encoder(conv)
+decoder = Decoder(vocab_size=word_model.vocab.length(),batch_size=batch_size)
 
-# batch_size = 4
-# decoder = Decoder(vocab_size=word_model.vocab.length(),batch_size=batch_size)
-# c = torch.zeros((batch_size,1)).long()
-# c = Variable(c)
-# c = dec(c)
+if use_cuda:
+    encoder = encoder.cuda()
+    decoder = decoder.cuda()
 
+criterion = nn.CrossEntropyLoss()
+params = decoder.parameters()
+optimizer = torch.optim.Adam(params, lr=0.001)
 
+# Train the model
 for i,data in enumerate(dataloader):
     logger.info("Training batch no. " + str(i) + " of size 4")
-    images, captions = Variable(data['image']), data['captions']
-
-    captions = word_model.parse(captions)
-    pad(captions)
-    c = captions[0][0]
-    out = encoder(images)
-    # decoder(out)
-    for ci in c:
-        print(word_model.vocab.word(ci))
-    inp = decoder(inp)
-    print(out.size())
-    break
+    images,captions,lengths = data
+    images,captions = Variable(images.cuda(),volatile=True),Variable(captions.cuda())
     
+    targets = pack_padded_sequence(captions,lengths,batch_first=True)[0]
+
+    decoder.zero_grad()
+    encoder.zero_grad()
+
+    features = encoder(images)
+    outputs = decoder(features,captions,lengths)
+    print(outputs.size())
+    print(targets.size())
+    loss = criterion(outputs,targets)
+    print(loss[0].data)
+    loss.backward()
+    optimizer.step()

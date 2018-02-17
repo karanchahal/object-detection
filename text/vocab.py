@@ -9,6 +9,7 @@ import numpy as np
 # Create a logger object.
 logger = logging.getLogger(__name__)
 PROJECT_DIR = '/home/karan/attention-caption/'
+use_cuda = torch.cuda.is_available()
 
 class Vocab:
     
@@ -44,7 +45,7 @@ class Vocab:
         else:
             return self.word2id['<UNK>']
     
-    def length():
+    def length(self):
         return self.id
 
 class WordModel:
@@ -75,34 +76,25 @@ class WordModel:
 
     def build_vocab(self,captions):
         logger.warning("Building vocabulary")
-        remove = 0
 
-        for c in range(len(captions[0])):
-            for d in range(len(captions)):
+        for i in range(len(captions)):
+            caption = captions[i]
 
-                caption = captions[d][c]
-
-                tokenizer = RegexpTokenizer(r'\w+')
-                tokens = tokenizer.tokenize(caption)
-
-                for word in tokens:
-                    word = word.lower()
-                    if word not in self.word_model:
-                        remove = 1
-                        logger.error(str(word) + ' does not exist')
-                        self.collect_errors(word,filename=PROJECT_DIR + '/errors/word_error.log')
-                        break
-                    else:
-                        self.vocab.add(word)
-
-                if remove == 1:
-                    break
-            if remove == 1:
-                remove = 0
-            else:
-                self.vocab.examples += 1
+            tokenizer = RegexpTokenizer(r'\w+')
+            tokens = tokenizer.tokenize(caption)
+            for word in tokens:
+                word = word.lower()
+                if word not in self.word_model:
+                    logger.error(str(word) + ' does not exist')
+                    self.collect_errors(word,filename=PROJECT_DIR + '/errors/word_error.log')
+                else:
+                    self.vocab.add(word)
+            self.vocab.examples += 1
     
     def tensor(self,array):
+        # if use_cuda:
+        #     return torch.cuda.LongTensor(array)
+        # else:
         return torch.LongTensor(array)
 
     def parse(self,caption):
