@@ -72,7 +72,7 @@ optimizer = torch.optim.Adam(params, lr=0.001)
 
 # Train the model
 for i,data in enumerate(dataloader):
-    logger.info("Training batch no. " + str(i) + " of size 4")
+    # logger.info("Training batch no. " + str(i) + " of size 4")
     images,captions,lengths = data
     images,captions = Variable(images.cuda(),volatile=True),Variable(captions.cuda())
     
