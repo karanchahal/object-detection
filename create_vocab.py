@@ -1,5 +1,5 @@
 import torch
-from data.dataset import get_image_ids,coco,coco_caps
+from data.dataset import get_image_ids,coco,coco_caps, get_ann_ids
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 from data.DataLoader import CocoDataset, RandomCrop
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 dataset_size = 16
 
-imgIds = get_image_ids()
+annIds = get_ann_ids()
 logger.warning("Loading Dataset")
 
 '''Dataset Loading'''
@@ -22,10 +22,11 @@ image_transform = transforms.Compose([
         RandomCrop(224),
         transforms.ToTensor()
     ])
-dataset = CocoDataset(imgIds=imgIds,
+dataset = CocoDataset(annIds=annIds,
                     coco=coco,
                     coco_caps=coco_caps,
-                    transform=image_transform
+                    transform=image_transform,
+                    create_vocab=True
                 )
 dataloader = torch.utils.data.DataLoader(
                                         dataset,
@@ -38,12 +39,12 @@ logger.warning("Starting training loop")
 '''Training Loop'''
 
 word_model = WordModel()
-word_model.load_model()
+word_model.load_embeddings()
 
-for i,data in enumerate(dataloader):
+for i,captions in enumerate(dataloader):
     logger.info("Training batch no. " + str(i) + " of size 4")
-    captions = data['captions']
     word_model.build_vocab(captions)
-    
+
+print('Total examples are  ',word_model.vocab.examples)
 
 word_model.save(filename='model_logs/word_model.pkl')
