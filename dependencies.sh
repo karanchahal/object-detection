@@ -1,5 +1,6 @@
 echo 'Getting annotations'
 wget http://images.cocodataset.org/annotations/annotations_trainval2014.zip
+unzip annotations_trainval2014.zip
 echo 'Installing coco api'
 git clone https://github.com/cocodataset/cocoapi.git
 cd cocoapi/PythonAPI
