@@ -7,8 +7,7 @@ import numpy as np
 from torch.nn.utils.rnn import pack_padded_sequence
 logger = logging.getLogger(__name__)
 
-PROJECT_DIR = '/home/karan/attention-caption/'
-DATASET_DIR = '/home/karan/coco/images/'
+PROJECT_DIR = '.'
 use_cuda = torch.cuda.is_available()
 
 class CocoDataset(Dataset):
