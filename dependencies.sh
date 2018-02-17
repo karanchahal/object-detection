@@ -4,6 +4,8 @@ echo 'Installing coco api'
 git clone https://github.com/cocodataset/cocoapi.git
 cd cocoapi/PythonAPI
 make
+make install
+python setup.py install
 cd ../.././
 ls
 echo 'Installing python libraries'
