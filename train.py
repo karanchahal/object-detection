@@ -73,7 +73,7 @@ params = decoder.parameters()
 optimizer = torch.optim.Adam(params, lr=0.001)
 num_epochs = 10
 
-for epoch in num_epochs:
+for epoch in range(num_epochs):
     # Train the model
     for i,data in enumerate(dataloader):
         # logger.info("Training batch no. " + str(i) + " of size 4")
@@ -89,7 +89,7 @@ for epoch in num_epochs:
         outputs = decoder(features,captions,lengths)
         loss = criterion(outputs,targets)
 
-        if i%100 == 0:
+        if i%5000 == 0:
             logger.info("Epoch is " + str(epoch) +  "Loss is " + str(loss.data[0]) + " of batch number " + str(i))
         loss.backward()
         optimizer.step()
