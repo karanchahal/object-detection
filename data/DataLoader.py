@@ -121,7 +121,7 @@ class RandomCrop(object):
 
     def rescale(self,image):
         logger.warning('Rescaling for small images')
-        return image.reshape((250,250,3))
+        return np.resize(image,(250,250,3))
 
 def collate_fn(data):
     ''' input: tuple of images and captions
