@@ -1,7 +1,8 @@
 import torch.nn as nn
-from Encoder import Encoder
 from torch.autograd import Variable
 import torch
+from torch.nn.utils.rnn import pack_padded_sequence
+
 
 class Decoder(nn.Module):
     ''' Simple GRU Decoder, converts words to embeddings if not using word embeddings
@@ -16,7 +17,8 @@ class Decoder(nn.Module):
         self.batch_size = batch_size
 
         self.embedding = nn.Embedding(vocab_size,embed_size)
-        self.gru = nn.GRU(hidden_size, hidden_size, num_layers=num_layers,batch_first=True)
+        self.gru = nn.GRU(hidden_size, hidden_size, num_layers=num_layers, batch_first=True)
+        self.lstm = nn.LSTM(embed_size, hidden_size, num_layers=num_layers, batch_first=True)
         self.fc = nn.Linear(hidden_size,vocab_size)
 
         self.hidden = self.initHidden()
@@ -31,12 +33,14 @@ class Decoder(nn.Module):
             elif isinstance(m,nn.Embedding):
                 m.weight.data.uniform_(-0.1, 0.1)
 
-    def forward(self,x):
-        x = self.embedding(x)
+    def forward(self,features,captions,lengths):
+        x = self.embedding(captions)
         print(x.size())
-        x, self.hidden = self.gru(x,self.hidden)
-        print(x.size())
-        x = self.fc(x)
+        packed = pack_padded_sequence(x,lengths,batch_first=True)
+        # x, self.hidden = self.gru(packed,self.hidden)
+        x, _ = self.lstm(packed)
+        print(x[0].size())
+        x = self.fc(x[0])
         print(x.size())
         return x
     
