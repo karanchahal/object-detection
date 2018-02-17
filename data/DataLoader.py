@@ -12,7 +12,7 @@ DATASET_DIR = '/home/karan/coco/images/'
 class CocoDataset(Dataset):
     """Face Landmarks dataset."""
 
-    def __init__(self, annIds, coco, coco_caps, word_model, transform=None):
+    def __init__(self, annIds, coco, coco_caps, word_model=None, transform=None,create_vocab=False):
         """
         Args:
             annIds (string): annotation ids of the captions.
@@ -27,6 +27,7 @@ class CocoDataset(Dataset):
         self.annIds = annIds
         self.word_model = word_model
         self.transform = transform
+        self.create_vocab = create_vocab
 
     def write_to_log(self,sentence,filename):
         logger.error(str(sentence) + ' writing to log')
@@ -45,8 +46,13 @@ class CocoDataset(Dataset):
         img_id = self.coco_caps.anns[ann_id]['image_id']
         path = self.coco_caps.loadImgs(img_id)[0]['coco_url']
        
+        # create vocab
+        if self.create_vocab:
+            return caption
+
         # Create caption as list of ids
         caption = self.word_model.parse(caption)
+
         # Create image
         image = torch.Tensor(np.zeros((3,224,224)))
 

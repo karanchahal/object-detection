@@ -75,32 +75,20 @@ class WordModel:
 
     def build_vocab(self,captions):
         logger.warning("Building vocabulary")
-        remove = 0
 
-        for c in range(len(captions[0])):
-            for d in range(len(captions)):
+        for i in range(len(captions)):
+            caption = captions[i]
 
-                caption = captions[d][c]
-
-                tokenizer = RegexpTokenizer(r'\w+')
-                tokens = tokenizer.tokenize(caption)
-
-                for word in tokens:
-                    word = word.lower()
-                    if word not in self.word_model:
-                        remove = 1
-                        logger.error(str(word) + ' does not exist')
-                        self.collect_errors(word,filename=PROJECT_DIR + '/errors/word_error.log')
-                        break
-                    else:
-                        self.vocab.add(word)
-
-                if remove == 1:
-                    break
-            if remove == 1:
-                remove = 0
-            else:
-                self.vocab.examples += 1
+            tokenizer = RegexpTokenizer(r'\w+')
+            tokens = tokenizer.tokenize(caption)
+            for word in tokens:
+                word = word.lower()
+                if word not in self.word_model:
+                    logger.error(str(word) + ' does not exist')
+                    self.collect_errors(word,filename=PROJECT_DIR + '/errors/word_error.log')
+                else:
+                    self.vocab.add(word)
+            self.vocab.examples += 1
     
     def tensor(self,array):
         return torch.LongTensor(array)
