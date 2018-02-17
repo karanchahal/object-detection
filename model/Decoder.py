@@ -35,13 +35,9 @@ class Decoder(nn.Module):
 
     def forward(self,features,captions,lengths):
         x = self.embedding(captions)
-        print(x.size())
         packed = pack_padded_sequence(x,lengths,batch_first=True)
-        # x, self.hidden = self.gru(packed,self.hidden)
         x, _ = self.lstm(packed)
-        print(x[0].size())
         x = self.fc(x[0])
-        print(x.size())
         return x
     
     def initHidden(self):
