@@ -4,3 +4,4 @@ nltk
 gensim
 numpy
 pycocotools
+cython
