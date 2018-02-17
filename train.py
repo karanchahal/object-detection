@@ -62,6 +62,8 @@ conv = resnet34(pretrained=True)
 encoder = Encoder(conv)
 decoder = Decoder(vocab_size=word_model.vocab.length(),batch_size=batch_size)
 
+print('CUDA is ', use_cuda)
+
 if use_cuda:
     encoder = encoder.cuda()
     decoder = decoder.cuda()
@@ -69,23 +71,30 @@ if use_cuda:
 criterion = nn.CrossEntropyLoss()
 params = decoder.parameters()
 optimizer = torch.optim.Adam(params, lr=0.001)
+num_epochs = 10
 
-# Train the model
-for i,data in enumerate(dataloader):
-    # logger.info("Training batch no. " + str(i) + " of size 4")
-    images,captions,lengths = data
-    images,captions = Variable(images.cuda(),volatile=True),Variable(captions.cuda())
-    
-    targets = pack_padded_sequence(captions,lengths,batch_first=True)[0]
+for epoch in num_epochs:
+    # Train the model
+    for i,data in enumerate(dataloader):
+        # logger.info("Training batch no. " + str(i) + " of size 4")
+        images,captions,lengths = data
+        images,captions = Variable(images.cuda(),volatile=True),Variable(captions.cuda())
+        
+        targets = pack_padded_sequence(captions,lengths,batch_first=True)[0]
 
-    decoder.zero_grad()
-    encoder.zero_grad()
+        decoder.zero_grad()
+        encoder.zero_grad()
 
-    features = encoder(images)
-    outputs = decoder(features,captions,lengths)
-    loss = criterion(outputs,targets)
+        features = encoder(images)
+        outputs = decoder(features,captions,lengths)
+        loss = criterion(outputs,targets)
 
-    if i%100 == 0:
-        logger.info("Loss is " + str(loss.data[0]) + " of batch number " + str(i))
-    loss.backward()
-    optimizer.step()
+        if i%100 == 0:
+            logger.info("Epoch is " + str(epoch) +  "Loss is " + str(loss.data[0]) + " of batch number " + str(i))
+        loss.backward()
+        optimizer.step()
+        
+    torch.save(encoder.state_dict(), 'encoder.tar')
+    torch.save(decoder.state_dict(),'decoder.tar')
+
+
