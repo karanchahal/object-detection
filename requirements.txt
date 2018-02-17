@@ -4,4 +4,4 @@ nltk
 gensim
 numpy
 cython
-colouredlogs
+coloredlogs
