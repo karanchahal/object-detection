@@ -86,6 +86,6 @@ for i,data in enumerate(dataloader):
     loss = criterion(outputs,targets)
 
     if i%100 == 0:
-        logger.info("Loss is " + str(loss.data[0]))
+        logger.info("Loss is " + str(loss.data[0]) + " of batch number " + str(i))
     loss.backward()
     optimizer.step()
