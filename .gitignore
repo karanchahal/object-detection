@@ -4,3 +4,4 @@
 *.pkl
 /model_logs
 *.tar
+cocoapi/
