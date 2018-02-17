@@ -4,6 +4,8 @@ echo 'Installing coco api'
 git clone https://github.com/cocodataset/cocoapi.git
 cd cocoapi/PythonAPI
 make
+cd ../.././
+ls
 echo 'Installing python libraries'
 pip install -r requirements.txt
 echo 'Installed all dependencies'
