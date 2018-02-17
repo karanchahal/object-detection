@@ -96,11 +96,9 @@ class RandomCrop(object):
     def __call__(self, image):
         
         if len(image.shape) < 3:
-            logger.error('Converting to RGB from grayscale')
             image = self.add_channels(image)
         
         if image.shape[0] < self.output_size[0] or image.shape[1] < self.output_size[1]:
-            logger.error('Rescaling image to be bigger')
             image = self.rescale(image)
 
         h, w = image.shape[:2]

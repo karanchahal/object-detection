@@ -15,5 +15,7 @@ cd ../.././
 ls
 echo 'Installing python libraries'
 pip install -r requirements.txt
+echo 'Some file folder modifications'
+mkdir errors
 echo 'Installed all dependencies'
 
