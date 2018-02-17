@@ -9,6 +9,7 @@ import numpy as np
 # Create a logger object.
 logger = logging.getLogger(__name__)
 PROJECT_DIR = '/home/karan/attention-caption/'
+use_cuda = torch.cuda.is_available()
 
 class Vocab:
     
@@ -44,7 +45,7 @@ class Vocab:
         else:
             return self.word2id['<UNK>']
     
-    def length():
+    def length(self):
         return self.id
 
 class WordModel:
@@ -91,6 +92,9 @@ class WordModel:
             self.vocab.examples += 1
     
     def tensor(self,array):
+        # if use_cuda:
+        #     return torch.cuda.LongTensor(array)
+        # else:
         return torch.LongTensor(array)
 
     def parse(self,caption):

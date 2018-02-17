@@ -4,10 +4,12 @@ from torch.utils.data import Dataset, DataLoader
 from skimage import io, transform
 import coloredlogs, logging
 import numpy as np
+from torch.nn.utils.rnn import pack_padded_sequence
 logger = logging.getLogger(__name__)
 
 PROJECT_DIR = '/home/karan/attention-caption/'
 DATASET_DIR = '/home/karan/coco/images/'
+use_cuda = torch.cuda.is_available()
 
 class CocoDataset(Dataset):
     """Face Landmarks dataset."""
@@ -136,10 +138,13 @@ def collate_fn(data):
     images = torch.stack(images,0)
     
     #Merge captions
+    
     lengths = [len(cap) for cap in captions]
-    captions = torch.zeros(len(captions), max(lengths)).long() # adding padding token to everything
+
+    targets = torch.zeros(len(captions), max(lengths)).long() # adding padding token to everything
+    
     for i,cap in enumerate(captions):
         end = lengths[i]
-        captions[i,:end] = cap[:end]
+        targets[i,:end] = cap[:end]
     
-    return images,captions,lengths
+    return images,targets,lengths
