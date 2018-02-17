@@ -16,7 +16,7 @@ coloredlogs.install(level='DEBUG')
 coloredlogs.install(fmt='%(asctime)s,%(msecs)03d %(levelname)s %(message)s')
 # Dataset Location variables
 
-dataDir='/home/karan/coco/' # path to dataset folder
+dataDir='.' # path to dataset folder
 dataType='val2014'
 annFile='{}/annotations/instances_{}.json'.format(dataDir,dataType)
 annCapFile = '{}/annotations/captions_{}.json'.format(dataDir,dataType)
