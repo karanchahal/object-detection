@@ -91,6 +91,8 @@ def evaluate(encoder,decoder,val_dataloader):
         
         targets,pad_lengths = pack_padded_sequence(captions,lengths,batch_first=True)
 
+        pad_lengths = [ int(x) for x in pad_lengths ]
+
         decoder.zero_grad()
         encoder.zero_grad()
 
