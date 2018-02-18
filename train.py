@@ -73,6 +73,9 @@ val_dataloader = torch.utils.data.DataLoader(
 
 
 def evaluate(encoder,decoder,val_dataloader):
+    
+    logger.warning('Model is being evaluated with ' + str(len(val_dataloader)*batch_size) + " examples")
+    
     running_loss = 0.0
     running_score = 0.0
     num_examples = len(val_dataloader)
@@ -142,6 +145,7 @@ num_epochs = 10
 
 for epoch in range(num_epochs):
     # Train the model
+    running_loss = 0.0
     for i,data in enumerate(train_dataloader):
         # logger.info("Training batch no. " + str(i) + " of size 4")
         images,captions,lengths = data
@@ -159,8 +163,11 @@ for epoch in range(num_epochs):
         outputs = decoder(features,captions,lengths)
         loss = criterion(outputs,targets)
 
+        running_loss += float(loss.data[0]/i)
+
         if i%5000 == 0:
-            logger.info("Epoch is " + str(epoch) +  " Loss is " + str(loss.data[0]) + " of batch number " + str(i))
+            logger.info("Epoch is " + str(epoch) +  " Loss is " + str(running_loss) + " of batch number " + str(i))
+        
         loss.backward()
         optimizer.step()
     
