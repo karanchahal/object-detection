@@ -10,14 +10,14 @@ from torch.nn.utils.rnn import pack_padded_sequence,pad_packed_sequence
 from torchvision.models.resnet import resnet34
 from model.Encoder import Encoder
 from model.Decoder import Decoder
-from nltk.translate.bleu_score import sentence_bleu
+from nltk.translate.bleu_score import sentence_bleu,SmoothingFunction
 import torch.nn as nn
 # logging settings
 
 
 def bleu(reference,candidate):
-    
-    score = sentence_bleu(reference, candidate)
+    cc = SmoothingFunction()
+    score = sentence_bleu(reference, candidate, smoothing_function=cc.method3)
     return score
 
 # Create a logger object.
@@ -31,7 +31,7 @@ dataset_size = 16
 
 annIds = get_ann_ids()
 imgIds = get_image_ids()
-train_ids, val_ids = get_test_train_split(annIds,percentage=0.9)
+train_ids, val_ids = get_test_train_split(annIds,percentage=0.999)
 
 logger.warning("Loading Dataset")
 word_model = WordModel()
@@ -170,7 +170,6 @@ for epoch in range(num_epochs):
         
         loss.backward()
         optimizer.step()
-        break
     
     evaluate(encoder,decoder,val_dataloader)
     torch.save(encoder.state_dict(), 'encoder.tar')
