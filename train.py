@@ -1,5 +1,5 @@
 import torch
-from data.dataset import get_image_ids,coco,coco_caps,get_ann_ids
+from data.dataset import get_image_ids,coco,coco_caps,get_ann_ids,get_test_train_split
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 from data.DataLoader import CocoDataset, RandomCrop, collate_fn
@@ -23,6 +23,11 @@ dataset_size = 16
 annIds = get_ann_ids()
 imgIds = get_image_ids()
 logger.warning("Loading Dataset")
+
+train_ids, val_ids = get_test_train_split(annIds)
+print(len(train_ids))
+print(len(val_ids))
+
 
 '''Dataset Loading'''
 

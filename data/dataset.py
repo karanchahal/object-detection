@@ -56,4 +56,11 @@ def get_image_ids(sample=None):
         # Returning a subset of the dataset
         return imgIds[:sample]
     
-  
+
+def get_test_train_split(ids):
+    ''' Splits train and validation set in ratio 4:1'''
+    train_len = int(len(ids)*0.8)
+    print(train_len)
+    train_ids = ids[:train_len]
+    val_ids = ids[train_len:]
+    return train_ids, val_ids
