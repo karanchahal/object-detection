@@ -17,7 +17,7 @@ import torch.nn as nn
 
 def bleu(reference,candidate):
     cc = SmoothingFunction()
-    score = sentence_bleu(reference, candidate, smoothing_function=cc.method4)
+    score = sentence_bleu(reference, candidate)
     return score
 
 # Create a logger object.
