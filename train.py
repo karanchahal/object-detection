@@ -170,6 +170,7 @@ for epoch in range(num_epochs):
         
         loss.backward()
         optimizer.step()
+        break
     
     evaluate(encoder,decoder,val_dataloader)
     torch.save(encoder.state_dict(), 'encoder.tar')
