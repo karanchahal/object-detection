@@ -163,13 +163,14 @@ for epoch in range(num_epochs):
         outputs = decoder(features,captions,lengths)
         loss = criterion(outputs,targets)
 
-        running_loss += float(loss.data[0]/i)
+        running_loss += float(loss.data[0]/(i+1))
 
         if i%5000 == 0:
             logger.info("Epoch is " + str(epoch) +  " Loss is " + str(running_loss) + " of batch number " + str(i))
         
         loss.backward()
         optimizer.step()
+        break
     
     evaluate(encoder,decoder,val_dataloader)
     torch.save(encoder.state_dict(), 'encoder.tar')
