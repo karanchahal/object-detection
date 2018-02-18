@@ -100,8 +100,8 @@ def evaluate(encoder,decoder,val_dataloader):
         outputs = decoder(features,captions,lengths)
         loss = criterion(outputs,targets)
 
-        targets = pad_packed_sequence((targets,pad_lengths),batch_first=True)[0]
-        outputs = pad_packed_sequence((outputs,pad_lengths),batch_first=True)[0]
+        targets = pad_packed_sequence((targets.int(),pad_lengths),batch_first=True)[0]
+        outputs = pad_packed_sequence((outputs.int(),pad_lengths),batch_first=True)[0]
 
         _, outputs = outputs.data.topk(1)
         outputs = torch.squeeze(outputs)
