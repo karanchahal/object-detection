@@ -91,6 +91,14 @@ class WordModel:
                     self.vocab.add(word)
             self.vocab.examples += 1
     
+    def to_sentence(self,captions):
+        sent_captions = []
+        for caption in captions:
+            sentence = ' '.join([self.vocab.word(int(c)) for c in caption])
+            sent_captions.append(sentence)
+        
+        return sent_captions
+
     def tensor(self,array):
         # if use_cuda:
         #     return torch.cuda.LongTensor(array)
