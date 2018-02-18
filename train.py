@@ -31,7 +31,7 @@ dataset_size = 16
 
 annIds = get_ann_ids()
 imgIds = get_image_ids()
-train_ids, val_ids = get_test_train_split(annIds,percentage=0.999)
+train_ids, val_ids = get_test_train_split(annIds,percentage=0.99)
 
 logger.warning("Loading Dataset")
 word_model = WordModel()
@@ -170,7 +170,6 @@ for epoch in range(num_epochs):
         
         loss.backward()
         optimizer.step()
-        break
     
     evaluate(encoder,decoder,val_dataloader)
     torch.save(encoder.state_dict(), 'encoder.tar')
