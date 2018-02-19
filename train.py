@@ -140,7 +140,7 @@ if use_cuda:
 criterion = nn.CrossEntropyLoss()
 params = list(decoder.parameters()) + list(encoder.parameters())
 optimizer = torch.optim.Adam(params, lr=0.001)
-num_epochs = 10
+num_epochs = 7
 
 
 for epoch in range(num_epochs):

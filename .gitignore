@@ -6,3 +6,5 @@
 cocoapi/
 !/model_logs/word_model.pkl
 /annotations
+!encoder.tar
+!decoder.tar

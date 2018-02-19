@@ -1,6 +1,6 @@
 echo 'Getting annotations'
 wget http://images.cocodataset.org/annotations/annotations_trainval2014.zip
-unzip annotations_trainval2014.zip -y
+unzip annotations_trainval2014.zip
 echo 'Getting word embeddings'
 wget http://nlpserver2.inf.ufrgs.br/alexandres/vectors/lexvec.enwiki%2bnewscrawl.300d.W.pos.vectors.gz
 gunzip -k lexvec.enwiki+newscrawl.300d.W.pos.vectors.gz
