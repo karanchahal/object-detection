@@ -35,6 +35,7 @@ class Decoder(nn.Module):
 
     def forward(self,features,captions,lengths):
         x = self.embedding(captions)
+        x = torch.cat((features.unsqueeze(1), x), 1)
         packed = pack_padded_sequence(x,lengths,batch_first=True)
         x, _ = self.lstm(packed)
         x = self.fc(x[0])

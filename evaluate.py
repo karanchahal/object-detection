@@ -110,7 +110,8 @@ def evaluate(encoder,decoder,val_dataloader):
             targets_in_sentence = word_model.to_sentence(targets.data.numpy())
             outputs_in_sentence = word_model.to_sentence(outputs.numpy())
         
-
+        print(targets_in_sentence)
+        print(outputs_in_sentence)
         score = bleu(targets_in_sentence, outputs_in_sentence)
         
         running_score += float(score/num_examples)
@@ -138,41 +139,11 @@ if use_cuda:
     decoder = decoder.cuda()
 
 criterion = nn.CrossEntropyLoss()
-params = list(decoder.parameters()) + list(encoder.fc.parameters())
+params = list(decoder.parameters()) + list(encoder.parameters())
 optimizer = torch.optim.Adam(params, lr=0.001)
 num_epochs = 7
 
+encoder.load_state_dict(torch.load('./encoder.tar'))
+decoder.load_state_dict(torch.load('./decoder.tar'))
 
-for epoch in range(num_epochs):
-    # Train the model
-    running_loss = 0.0
-    for i,data in enumerate(train_dataloader):
-        # logger.info("Training batch no. " + str(i) + " of size 4")
-        images,captions,lengths = data
-        if use_cuda:
-            images,captions = Variable(images.cuda()),Variable(captions.cuda())
-        else:
-            images,captions = Variable(images),Variable(captions)
-        
-        targets = pack_padded_sequence(captions,lengths,batch_first=True)[0]
-
-        decoder.zero_grad()
-        encoder.zero_grad()
-
-        features = encoder(images)
-        outputs = decoder(features,captions,lengths)
-        loss = criterion(outputs,targets)
-
-        running_loss += float(loss.data[0]/(i+1))
-
-        if i%5000 == 0:
-            logger.info("Epoch is " + str(epoch) +  " Loss is " + str(running_loss) + " of batch number " + str(i))
-        
-        loss.backward()
-        optimizer.step()
-    
-    evaluate(encoder,decoder,val_dataloader)
-    torch.save(encoder.state_dict(), 'encoder.tar')
-    torch.save(decoder.state_dict(),'decoder.tar')
-
-
+evaluate(encoder,decoder,val_dataloader)
