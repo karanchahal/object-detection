@@ -25,9 +25,8 @@ logger = logging.getLogger(__name__)
 
 use_cuda = torch.cuda.is_available()
 
-batch_size = 4
+batch_size = 32
 dataset_size = 16
-
 
 annIds = get_ann_ids()
 imgIds = get_image_ids()
@@ -139,8 +138,8 @@ if use_cuda:
 
 criterion = nn.CrossEntropyLoss()
 params = list(decoder.parameters()) + list(encoder.fc.parameters())
-optimizer = torch.optim.Adam(params, lr=0.001)
-num_epochs = 7
+optimizer = torch.optim.Adam(params, lr=0.01)
+num_epochs = 15
 
 
 for epoch in range(num_epochs):
