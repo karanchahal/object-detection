@@ -8,3 +8,4 @@ cocoapi/
 /annotations
 !encoder.tar
 !decoder.tar
+*.vectors
