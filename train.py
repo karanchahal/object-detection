@@ -140,7 +140,7 @@ if use_cuda:
 criterion = nn.CrossEntropyLoss()
 params = list(decoder.parameters()) + list(encoder.fc.parameters())
 optimizer = torch.optim.Adam(params, lr=0.001)
-num_epochs = 3
+num_epochs = 0
 
 
 for epoch in range(num_epochs):
@@ -171,7 +171,7 @@ for epoch in range(num_epochs):
         loss.backward()
         optimizer.step()
     
-    evaluate(encoder,decoder,val_dataloader)
+    # evaluate(encoder,decoder,val_dataloader)
     torch.save(encoder.state_dict(), 'encoder.tar')
     torch.save(decoder.state_dict(),'decoder.tar')
 
