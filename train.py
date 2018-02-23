@@ -175,4 +175,5 @@ for epoch in range(num_epochs):
     torch.save(encoder.state_dict(), 'encoder.tar')
     torch.save(decoder.state_dict(),'decoder.tar')
 
-
+torch.save(encoder.state_dict(), 'encoder.tar')
+torch.save(decoder.state_dict(),'decoder.tar')
