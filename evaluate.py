@@ -12,6 +12,7 @@ from model.Encoder import Encoder
 from model.Decoder import Decoder
 from nltk.translate.bleu_score import sentence_bleu,SmoothingFunction
 import torch.nn as nn
+from scipy import misc
 # logging settings
 
 
@@ -110,8 +111,10 @@ def evaluate(encoder,decoder,val_dataloader):
             targets_in_sentence = word_model.to_sentence(targets.data.numpy())
             outputs_in_sentence = word_model.to_sentence(outputs.numpy())
         
-        print(targets_in_sentence)
-        print(outputs_in_sentence)
+        img = images.data.cpu().numpy()
+        misc.imshow(img[0])
+        print(targets_in_sentence[0])
+        print(outputs_in_sentence[0])
         score = bleu(targets_in_sentence, outputs_in_sentence)
         
         running_score += float(score/num_examples)

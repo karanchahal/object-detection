@@ -149,6 +149,7 @@ for epoch in range(num_epochs):
     for i,data in enumerate(train_dataloader):
         # logger.info("Training batch no. " + str(i) + " of size 4")
         images,captions,lengths = data
+       
         if use_cuda:
             images,captions = Variable(images.cuda()),Variable(captions.cuda())
         else:
