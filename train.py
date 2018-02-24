@@ -133,7 +133,6 @@ encoder = Encoder(conv)
 decoder = Decoder(vocab_size=word_model.vocab.length(),batch_size=batch_size)
 
 logger.info('CUDA is ' + str(use_cuda))
-
 if use_cuda:
     encoder = encoder.cuda()
     decoder = decoder.cuda()
@@ -170,7 +169,7 @@ for epoch in range(num_epochs):
 
         running_loss += float(loss.data[0]/(i+1))
 
-        if i%5000 == 0:
+        if i%10 == 0:
             logger.info("Epoch is " + str(epoch) +  " Loss is " + str(running_loss) + " of batch number " + str(i))
         
         loss.backward()
