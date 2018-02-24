@@ -6,3 +6,4 @@ numpy
 cython
 coloredlogs
 scipy
+pyqt5

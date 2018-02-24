@@ -99,6 +99,10 @@ class WordModel:
         
         return sent_captions
 
+    def to_sentence_from_ids(self,caption):
+        sentence = ' '.join([self.vocab.word(int(c)) for c in caption])
+        return sentence
+
     def tensor(self,array):
         # if use_cuda:
         #     return torch.cuda.LongTensor(array)

@@ -13,6 +13,8 @@ from model.Decoder import Decoder
 from nltk.translate.bleu_score import sentence_bleu,SmoothingFunction
 import torch.nn as nn
 from scipy import misc
+from skimage import io, transform
+from skimage.viewer import ImageViewer
 # logging settings
 
 
@@ -95,7 +97,18 @@ def evaluate(encoder,decoder,val_dataloader):
         
         decoder.zero_grad()
         encoder.zero_grad()
+        image = io.imread('test3.jpg')
+        image = image_transform(image)
+        print(images.size())
+        print(image.size())
 
+        # images[0] = Variable(image.cuda())
+        img = images[0].data.cpu().permute(1,2,0).numpy()
+        print(img.shape)
+        viewer = ImageViewer(img)
+        viewer.show()
+        
+       
         features = encoder(images)
         outputs = decoder(features,captions,lengths)
         loss = criterion(outputs,targets)
@@ -112,7 +125,7 @@ def evaluate(encoder,decoder,val_dataloader):
             outputs_in_sentence = word_model.to_sentence(outputs.numpy())
         
         img = images.data.cpu().numpy()
-        misc.imshow(img[0])
+        # misc.imshow(img[0])
         print(targets_in_sentence[0])
         print(outputs_in_sentence[0])
         score = bleu(targets_in_sentence, outputs_in_sentence)
@@ -122,7 +135,20 @@ def evaluate(encoder,decoder,val_dataloader):
     
     logger.warning("The bleu score is " + str(running_score) + " and loss is " + str(running_loss))
 
+def sample(encoder,decoder,filepaths):
+    
+    for path in filepaths:
+        image = io.imread(path)
+        image = image_transform(image)
+        print(image.size())
+        image = Variable(image.cuda().unsqueeze(0))
+        print(image.size())
+        features = encoder(image)
+        print(features.size())
+        ids = decoder.sample(features)
+        print(word_model.to_sentence_from_ids(ids))
 
+        
 
 logger.warning("Starting training loop")
 '''Training Loop'''
@@ -150,3 +176,4 @@ encoder.load_state_dict(torch.load('./encoder.tar'))
 decoder.load_state_dict(torch.load('./decoder.tar'))
 
 evaluate(encoder,decoder,val_dataloader)
+# sample(encoder,decoder,filepaths=['test2.jpg','test3.jpg'])

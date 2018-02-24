@@ -5,6 +5,8 @@ from skimage import io, transform
 import coloredlogs, logging
 import numpy as np
 from torch.nn.utils.rnn import pack_padded_sequence
+from skimage.viewer import ImageViewer
+
 logger = logging.getLogger(__name__)
 
 PROJECT_DIR = './'
@@ -56,14 +58,16 @@ class CocoDataset(Dataset):
 
         # Create image
         image = torch.Tensor(np.zeros((3,224,224)))
-
         try:
             image = io.imread(path)
         except Exception as e:
             print(e)
             self.write_to_log(path,filename=PROJECT_DIR + 'errors/image_error.log')
             return image,caption
-            
+        viewer = ImageViewer(image)
+        viewer.show()
+        
+
         try:
             if self.transform:
                 image = self.transform(image)
