@@ -25,9 +25,8 @@ logger = logging.getLogger(__name__)
 
 use_cuda = torch.cuda.is_available()
 
-batch_size = 4
+batch_size = 32
 dataset_size = 16
-
 
 annIds = get_ann_ids()
 imgIds = get_image_ids()
@@ -141,6 +140,7 @@ criterion = nn.CrossEntropyLoss()
 params = list(decoder.parameters()) + list(encoder.fc.parameters())
 optimizer = torch.optim.Adam(params, lr=0.001)
 num_epochs = 5
+
 
 logger.warning('Loading weights')
 encoder.load_state_dict(torch.load('./encoder.tar'))
