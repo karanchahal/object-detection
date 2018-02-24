@@ -2,7 +2,7 @@ import torch
 from data.dataset import get_image_ids,coco,coco_caps,get_ann_ids,get_test_train_split
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
-from data.DataLoader import CocoDataset, RandomCrop, collate_fn
+from data.DataLoader import CocoDataset, RandomCrop, Rescale, collate_fn
 from text.vocab import WordModel
 import coloredlogs, logging
 from torch.autograd import Variable
@@ -13,11 +13,8 @@ from model.Decoder import Decoder
 from nltk.translate.bleu_score import sentence_bleu,SmoothingFunction
 import torch.nn as nn
 from scipy import misc
-<<<<<<< HEAD
 from skimage import io, transform
 from skimage.viewer import ImageViewer
-=======
->>>>>>> 4d57990114d4b4d8267fd60bee6b08c33f0acec3
 # logging settings
 
 
@@ -44,8 +41,9 @@ word_model = WordModel()
 word_model.load(filename="model_logs/word_model.pkl")
 
 image_transform = transforms.Compose([
+        Rescale(250),
         RandomCrop(224),
-        transforms.ToTensor()
+        transforms.ToTensor(),
     ])
 train_dataset = CocoDataset(annIds=train_ids,
                     coco=coco,
@@ -100,22 +98,18 @@ def evaluate(encoder,decoder,val_dataloader):
         
         decoder.zero_grad()
         encoder.zero_grad()
-<<<<<<< HEAD
         image = io.imread('test3.jpg')
         image = image_transform(image)
         print(images.size())
         print(image.size())
 
         # images[0] = Variable(image.cuda())
-        img = images[0].data.cpu().permute(1,2,0).numpy()
-        print(img.shape)
-        viewer = ImageViewer(img)
-        viewer.show()
+        # img = images[0].data.cpu().permute(1,2,0).numpy()
+        # print(img.shape)
+        # viewer = ImageViewer(img)
+        # viewer.show()
         
        
-=======
-
->>>>>>> 4d57990114d4b4d8267fd60bee6b08c33f0acec3
         features = encoder(images)
         outputs = decoder(features,captions,lengths)
         loss = criterion(outputs,targets)
@@ -132,11 +126,7 @@ def evaluate(encoder,decoder,val_dataloader):
             outputs_in_sentence = word_model.to_sentence(outputs.numpy())
         
         img = images.data.cpu().numpy()
-<<<<<<< HEAD
         # misc.imshow(img[0])
-=======
-        misc.imshow(img[0])
->>>>>>> 4d57990114d4b4d8267fd60bee6b08c33f0acec3
         print(targets_in_sentence[0])
         print(outputs_in_sentence[0])
         score = bleu(targets_in_sentence, outputs_in_sentence)
@@ -146,7 +136,6 @@ def evaluate(encoder,decoder,val_dataloader):
     
     logger.warning("The bleu score is " + str(running_score) + " and loss is " + str(running_loss))
 
-<<<<<<< HEAD
 def sample(encoder,decoder,filepaths):
     
     for path in filepaths:
@@ -161,9 +150,6 @@ def sample(encoder,decoder,filepaths):
         print(word_model.to_sentence_from_ids(ids))
 
         
-=======
-
->>>>>>> 4d57990114d4b4d8267fd60bee6b08c33f0acec3
 
 logger.warning("Starting training loop")
 '''Training Loop'''
@@ -187,12 +173,8 @@ params = list(decoder.parameters()) + list(encoder.parameters())
 optimizer = torch.optim.Adam(params, lr=0.001)
 num_epochs = 7
 
-encoder.load_state_dict(torch.load('./encoder.tar'))
-decoder.load_state_dict(torch.load('./decoder.tar'))
+# encoder.load_state_dict(torch.load('./encoder.tar'))
+# decoder.load_state_dict(torch.load('./decoder.tar'))
 
-<<<<<<< HEAD
 evaluate(encoder,decoder,val_dataloader)
 # sample(encoder,decoder,filepaths=['test2.jpg','test3.jpg'])
-=======
-evaluate(encoder,decoder,val_dataloader)
->>>>>>> 4d57990114d4b4d8267fd60bee6b08c33f0acec3

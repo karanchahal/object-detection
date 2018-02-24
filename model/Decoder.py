@@ -41,7 +41,6 @@ class Decoder(nn.Module):
         x = self.fc(x[0])
         return x
     
-<<<<<<< HEAD
     def sample(self, features, states=None):
         """Samples captions for given image features (Greedy search)."""
         sampled_ids = []
@@ -56,7 +55,5 @@ class Decoder(nn.Module):
         # sampled_ids = torch.cat(sampled_ids, 1)                  # (batch_size, 20)
         return torch.Tensor(sampled_ids)
 
-=======
->>>>>>> 4d57990114d4b4d8267fd60bee6b08c33f0acec3
     def initHidden(self):
         return Variable(torch.zeros(self.num_layers,self.batch_size,self.hidden_size))

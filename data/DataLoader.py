@@ -5,7 +5,7 @@ from skimage import io, transform
 import coloredlogs, logging
 import numpy as np
 from torch.nn.utils.rnn import pack_padded_sequence
-
+from skimage.transform import resize
 from skimage.viewer import ImageViewer
 
 logger = logging.getLogger(__name__)
@@ -66,10 +66,7 @@ class CocoDataset(Dataset):
             print(e)
             self.write_to_log(path,filename=PROJECT_DIR + 'errors/image_error.log')
             return image,caption
-        viewer = ImageViewer(image)
-        viewer.show()
         
-
         try:
             if self.transform:
                 image = self.transform(image)
@@ -115,7 +112,8 @@ class RandomCrop(object):
 
         image = image[top: top + new_h,
                       left: left + new_w]
-
+        viewer = ImageViewer(image)
+        viewer.show()
         return image
 
     def add_channels(self,image):
@@ -126,6 +124,38 @@ class RandomCrop(object):
     def rescale(self,image):
         logger.warning('Rescaling for small images')
         return np.resize(image,(250,250,3))
+
+class Rescale(object):
+    """Rescale the image in a sample to a given size.
+
+    Args:
+        output_size (tuple or int): Desired output size. If tuple, output is
+            matched to output_size. If int, smaller of image edges is matched
+            to output_size keeping aspect ratio the same.
+    """
+
+    def __init__(self, output_size):
+        assert isinstance(output_size, (int, tuple))
+        self.output_size = output_size
+
+    def __call__(self, image):
+        
+        h, w = image.shape[:2]
+        
+        if isinstance(self.output_size, int):
+            if h > w:
+                new_h, new_w = self.output_size * h / w, self.output_size
+            else:
+                new_h, new_w = self.output_size, self.output_size * w / h
+        else:
+            new_h, new_w = self.output_size
+
+        new_h, new_w = int(new_h), int(new_w)
+
+        image = transform.resize(image, (new_h, new_w))
+
+        
+        return image
 
 def collate_fn(data):
     ''' input: tuple of images and captions
