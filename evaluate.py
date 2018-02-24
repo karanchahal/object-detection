@@ -98,16 +98,16 @@ def evaluate(encoder,decoder,val_dataloader):
         
         decoder.zero_grad()
         encoder.zero_grad()
-        image = io.imread('test3.jpg')
+        image = io.imread('ayo_tempest.jpg')
         image = image_transform(image)
-        print(images.size())
-        print(image.size())
+        image = image.numpy()
+        print(image)
+        viewer = ImageViewer(image)
+        viewer.show()
 
-        # images[0] = Variable(image.cuda())
-        # img = images[0].data.cpu().permute(1,2,0).numpy()
-        # print(img.shape)
-        # viewer = ImageViewer(img)
-        # viewer.show()
+
+        break
+        
         
        
         features = encoder(images)

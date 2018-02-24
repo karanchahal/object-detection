@@ -112,8 +112,7 @@ class RandomCrop(object):
 
         image = image[top: top + new_h,
                       left: left + new_w]
-        viewer = ImageViewer(image)
-        viewer.show()
+       
         return image
 
     def add_channels(self,image):

@@ -2,7 +2,7 @@ import torch
 from data.dataset import get_image_ids,coco,coco_caps,get_ann_ids,get_test_train_split
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
-from data.DataLoader import CocoDataset, RandomCrop, collate_fn
+from data.DataLoader import CocoDataset, RandomCrop, Rescale, collate_fn
 from text.vocab import WordModel
 import coloredlogs, logging
 from torch.autograd import Variable
@@ -37,9 +37,11 @@ word_model = WordModel()
 word_model.load(filename="model_logs/word_model.pkl")
 
 image_transform = transforms.Compose([
+        Rescale(250),
         RandomCrop(224),
-        transforms.ToTensor()
+        transforms.ToTensor(),
     ])
+
 train_dataset = CocoDataset(annIds=train_ids,
                     coco=coco,
                     coco_caps=coco_caps,
@@ -139,12 +141,10 @@ if use_cuda:
 criterion = nn.CrossEntropyLoss()
 params = list(decoder.parameters()) + list(encoder.fc.parameters())
 optimizer = torch.optim.Adam(params, lr=0.001)
-num_epochs = 5
+num_epochs = 0
 
 
 logger.warning('Loading weights')
-encoder.load_state_dict(torch.load('./encoder.tar'))
-decoder.load_state_dict(torch.load('./decoder.tar'))
 
 logger.warning('Training Started')
 for epoch in range(num_epochs):
