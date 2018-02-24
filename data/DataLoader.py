@@ -5,6 +5,7 @@ from skimage import io, transform
 import coloredlogs, logging
 import numpy as np
 from torch.nn.utils.rnn import pack_padded_sequence
+
 from skimage.viewer import ImageViewer
 
 logger = logging.getLogger(__name__)
@@ -43,6 +44,7 @@ class CocoDataset(Dataset):
 
     def __getitem__(self, idx):
         # logger.warning("Generating sample of annotation id: " + str(self.annIds[idx]))
+
         
         ann_id = self.annIds[idx]
         caption = self.coco_caps.anns[ann_id]['caption']
