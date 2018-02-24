@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 use_cuda = torch.cuda.is_available()
 
-batch_size = 32
+batch_size = 4
 dataset_size = 16
 
 annIds = get_ann_ids()
@@ -169,7 +169,7 @@ for epoch in range(num_epochs):
 
         running_loss += float(loss.data[0]/(i+1))
 
-        if i%10 == 0:
+        if i%5000 == 0:
             logger.info("Epoch is " + str(epoch) +  " Loss is " + str(running_loss) + " of batch number " + str(i))
         
         loss.backward()
