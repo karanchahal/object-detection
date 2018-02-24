@@ -141,7 +141,7 @@ if use_cuda:
 criterion = nn.CrossEntropyLoss()
 params = list(decoder.parameters()) + list(encoder.fc.parameters())
 optimizer = torch.optim.Adam(params, lr=0.001)
-num_epochs = 0
+num_epochs = 5
 
 
 logger.warning('Loading weights')
