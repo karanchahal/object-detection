@@ -170,5 +170,5 @@ num_epochs = 7
 # encoder.load_state_dict(torch.load('./encoder.tar'))
 # decoder.load_state_dict(torch.load('./decoder.tar'))
 
-evaluate(encoder,decoder,val_dataloader)
+evaluate(encoder,decoder,train_dataloader)
 # sample(encoder,decoder,filepaths=['test2.jpg','test3.jpg'])

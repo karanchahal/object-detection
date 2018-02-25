@@ -142,6 +142,8 @@ params = list(decoder.parameters()) + list(encoder.fc.parameters())
 optimizer = torch.optim.Adam(params, lr=0.001)
 num_epochs = 1
 
+encoder.load_state_dict(torch.load('./encoder.tar'))
+decoder.load_state_dict(torch.load('./decoder.tar'))
 
 logger.warning('Loading weights')
 
@@ -171,7 +173,7 @@ for epoch in range(num_epochs):
         loss = criterion(outputs,targets)
         print(loss.data[0])
         running_loss += loss.data[0]
-        if i%5 == 0:
+        if i%500 == 0:
             logger.info("Epoch is " + str(epoch) +  " Loss is " + str(running_loss/((i+1))) + " of batch number " + str(i))
         loss.backward()
         optimizer.step()
