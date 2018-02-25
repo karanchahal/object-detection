@@ -98,16 +98,13 @@ def evaluate(encoder,decoder,val_dataloader):
         
         decoder.zero_grad()
         encoder.zero_grad()
-        image = io.imread('ayo_tempest.jpg')
-        image = image_transform(image)
-        image = image.numpy()
-        print(image)
-        viewer = ImageViewer(image)
-        viewer.show()
+        # image = io.imread('ayo_tempest.jpg')
+        # image = image_transform(image)
+        # image = image.numpy()
+        # print(image)
+        # viewer = ImageViewer(image)
+        # viewer.show()
 
-
-        break
-        
         
        
         features = encoder(images)
@@ -127,10 +124,10 @@ def evaluate(encoder,decoder,val_dataloader):
         
         img = images.data.cpu().numpy()
         # misc.imshow(img[0])
-        print(targets_in_sentence[0])
-        print(outputs_in_sentence[0])
+        # print(targets_in_sentence[0])
+        # print(outputs_in_sentence[0])
         score = bleu(targets_in_sentence, outputs_in_sentence)
-        
+        print(loss.data[0])
         running_score += float(score/num_examples)
         running_loss += float(loss.data[0]/num_examples)
     
@@ -150,9 +147,6 @@ def sample(encoder,decoder,filepaths):
         print(word_model.to_sentence_from_ids(ids))
 
         
-
-logger.warning("Starting training loop")
-'''Training Loop'''
 
 print('Number of examples', word_model.vocab.examples)
 print('Number of words', len(word_model.vocab.id2word))

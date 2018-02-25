@@ -146,6 +146,9 @@ num_epochs = 1
 logger.warning('Loading weights')
 
 logger.warning('Training Started')
+num_examples = len(train_dataloader)
+main_loss = 0
+
 for epoch in range(num_epochs):
     # Train the model
     running_loss = 0.0
@@ -166,12 +169,10 @@ for epoch in range(num_epochs):
         features = encoder(images)
         outputs = decoder(features,captions,lengths)
         loss = criterion(outputs,targets)
-
-        running_loss += float(loss.data[0]/(i+1))
-
-        if i%5000 == 0:
-            logger.info("Epoch is " + str(epoch) +  " Loss is " + str(running_loss) + " of batch number " + str(i))
-        
+        print(loss.data[0])
+        running_loss += loss.data[0]
+        if i%5 == 0:
+            logger.info("Epoch is " + str(epoch) +  " Loss is " + str(running_loss/((i+1))) + " of batch number " + str(i))
         loss.backward()
         optimizer.step()
     
