@@ -10,7 +10,7 @@ class SATDecoder(nn.Module):
         and then runs them through a 3 layer GRU cell, outputs a probability of the vocabulary,
         adds the conv feature map as the hidden state
     '''
-    def __init__(self,vocab_size,embed_size=512,hidden_size=512,num_layers=3,batch_size=1):
+    def __init__(self,vocab_size,feature_size=512,embed_size=512,hidden_size=512,num_layers=3,batch_size=1):
         super(SATDecoder, self).__init__()
 
         self.hidden_size = hidden_size
@@ -18,11 +18,11 @@ class SATDecoder(nn.Module):
         self.batch_size = batch_size
 
         self.embedding = nn.Embedding(vocab_size,embed_size)
-        self.gru = nn.GRU(hidden_size, hidden_size, num_layers=num_layers, batch_first=True)
-        self.lstm = nn.LSTM(embed_size, hidden_size, num_layers=num_layers, batch_first=True)
-        self.fc = nn.Linear(hidden_size,vocab_size)
-
-        self.hidden = self.initHidden()
+        self.gru = nn.GRU(embed_size, hidden_size, num_layers=num_layers, batch_first=True)
+        self.output = nn.Linear(hidden_size,vocab_size)
+        self.lstm_input = nn.Linear(embed_size*2,embed_size)
+        self.f_att = nn.Linear(feature_size,embed_size)
+        
         self.init_weights()
 
     def init_weights(self): 
@@ -35,20 +35,30 @@ class SATDecoder(nn.Module):
                 m.weight.data.uniform_(-0.1, 0.1)
 
     def soft_attention(self,features,attention):
-        
+        ''' To do '''
         attention = attention.unsqueeze(2)
-        attention = features*attention
-        
+        attention = torch.sum(features*attention,dim=1)
+        attention = self.f_att(attention)
+        # print(attention.size())
         return attention
 
     def forward(self,features,captions,lengths):
         x = self.embedding(captions)
-        last_hidden_state = self.hidden[-1].unsqueeze(2)
-        attention = torch.bmm(features,last_hidden_state).squeeze(2)
-        attention = F.sigmoid(attention)
-        print(attention.size())
-        z_vectors = self.soft_attention(features,attention)
-        # now basically you have the image
+        self.hidden = self.initHidden(features)
+        caption_length = x.size(1)
+
+        for i in range(caption_length):
+            
+            last_hidden_state = self.hidden[-1].unsqueeze(2)
+            attention = torch.bmm(features,last_hidden_state).squeeze(2)
+            attention = F.sigmoid(attention)
+            z_vectors = self.soft_attention(features,attention)
+            cap_input = x[:,i,:]
+            input_and_context = torch.cat((z_vectors,cap_input),dim=1)
+            inp = self.lstm_input(input_and_context)
+            x,self.hidden = self.gru(x,self.hidden)
+
+        # print(x.size())
         return x
     
     def sample(self, features, states=None):
@@ -65,5 +75,8 @@ class SATDecoder(nn.Module):
         # sampled_ids = torch.cat(sampled_ids, 1)                  # (batch_size, 20)
         return torch.Tensor(sampled_ids)
 
-    def initHidden(self):
-        return Variable(torch.zeros(self.num_layers,self.batch_size,self.hidden_size))
+    def initHidden(self,features):
+        hidden = Variable(torch.zeros(self.num_layers,self.batch_size,self.hidden_size))
+        features = torch.sum(features,dim=1)
+        hidden[0] = features
+        return hidden
