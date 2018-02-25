@@ -48,7 +48,7 @@ class SATDecoder(nn.Module):
         attention = F.sigmoid(attention)
         print(attention.size())
         z_vectors = self.soft_attention(features,attention)
-        
+        # now basically you have the image
         return x
     
     def sample(self, features, states=None):
