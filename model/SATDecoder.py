@@ -2,6 +2,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch
 from torch.nn.utils.rnn import pack_padded_sequence
+import torch.nn.functional as F
 
 
 class SATDecoder(nn.Module):
@@ -33,17 +34,21 @@ class SATDecoder(nn.Module):
             elif isinstance(m,nn.Embedding):
                 m.weight.data.uniform_(-0.1, 0.1)
 
+    def soft_attention(self,features,attention):
+        
+        attention = attention.unsqueeze(2)
+        attention = features*attention
+        
+        return attention
+
     def forward(self,features,captions,lengths):
         x = self.embedding(captions)
         last_hidden_state = self.hidden[-1].unsqueeze(2)
-        print(features.size())
-        print(last_hidden_state.size())
         attention = torch.bmm(features,last_hidden_state).squeeze(2)
+        attention = F.sigmoid(attention)
         print(attention.size())
-        # x = torch.cat((features.unsqueeze(1), x), 1)
-        # packed = pack_padded_sequence(x,lengths,batch_first=True)
-        # x, _ = self.lstm(packed)
-        # x = self.fc(x[0])
+        z_vectors = self.soft_attention(features,attention)
+        
         return x
     
     def sample(self, features, states=None):
