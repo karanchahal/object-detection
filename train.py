@@ -12,6 +12,7 @@ from model.Encoder import Encoder
 from model.Decoder import Decoder
 from nltk.translate.bleu_score import sentence_bleu,SmoothingFunction
 import torch.nn as nn
+import numpy as np
 # logging settings
 
 
@@ -30,7 +31,7 @@ dataset_size = 16
 
 annIds = get_ann_ids()
 imgIds = get_image_ids()
-train_ids, val_ids = get_test_train_split(annIds,percentage=0.99)
+train_ids, val_ids = get_test_train_split(annIds,percentage=0.1)
 
 logger.warning("Loading Dataset")
 word_model = WordModel()
@@ -139,11 +140,11 @@ if use_cuda:
 
 criterion = nn.CrossEntropyLoss()
 params = list(decoder.parameters()) + list(encoder.fc.parameters())
-optimizer = torch.optim.Adam(params, lr=0.001)
-num_epochs = 1
+optimizer = torch.optim.Adam(params, lr=0.0001)
+num_epochs = 5
 
-encoder.load_state_dict(torch.load('./encoder.tar'))
-decoder.load_state_dict(torch.load('./decoder.tar'))
+# encoder.load_state_dict(torch.load('./encoder.tar'))
+# decoder.load_state_dict(torch.load('./decoder.tar'))
 
 logger.warning('Loading weights')
 
@@ -154,6 +155,7 @@ main_loss = 0
 for epoch in range(num_epochs):
     # Train the model
     running_loss = 0.0
+    total_step = len(train_dataloader)
     for i,data in enumerate(train_dataloader):
         # logger.info("Training batch no. " + str(i) + " of size 4")
         images,captions,lengths = data
@@ -171,10 +173,12 @@ for epoch in range(num_epochs):
         features = encoder(images)
         outputs = decoder(features,captions,lengths)
         loss = criterion(outputs,targets)
-        print(loss.data[0])
         running_loss += loss.data[0]
-        if i%500 == 0:
-            logger.info("Epoch is " + str(epoch) +  " Loss is " + str(running_loss/((i+1))) + " of batch number " + str(i))
+        if i%100 == 0:
+            logger.info('Epoch [%d/%d], Step [%d/%d], Loss: %.4f, Perplexity: %5.4f'
+                      %(epoch, num_epochs, i, total_step, 
+                        loss.data[0], np.exp(loss.data[0]))) 
+        
         loss.backward()
         optimizer.step()
     
@@ -182,5 +186,4 @@ for epoch in range(num_epochs):
     torch.save(encoder.state_dict(), 'encoder.tar')
     torch.save(decoder.state_dict(),'decoder.tar')
 
-torch.save(encoder.state_dict(), 'encoder.tar')
-torch.save(decoder.state_dict(),'decoder.tar')
+
