@@ -41,6 +41,8 @@ image_transform = transforms.Compose([
         Rescale(250),
         RandomCrop(224),
         transforms.ToTensor(),
+        transforms.Normalize((0.485, 0.456, 0.406), 
+                             (0.229, 0.224, 0.225))
     ])
 
 train_dataset = CocoDataset(annIds=train_ids,
@@ -131,7 +133,7 @@ print('Number of words', len(word_model.vocab.id2word))
 logger.warning("Loading the model")
 conv = resnet34(pretrained=True)
 encoder = Encoder(conv)
-decoder = Decoder(vocab_size=word_model.vocab.length(),batch_size=batch_size)
+decoder = Decoder(vocab_size=word_model.vocab.length())
 
 logger.info('CUDA is ' + str(use_cuda))
 if use_cuda:
@@ -139,8 +141,8 @@ if use_cuda:
     decoder = decoder.cuda()
 
 criterion = nn.CrossEntropyLoss()
-params = list(decoder.parameters()) + list(encoder.fc.parameters())
-optimizer = torch.optim.Adam(params, lr=0.0001)
+params = list(decoder.parameters()) + list(encoder.linear.parameters()) + list(encoder.bn.parameters())
+optimizer = torch.optim.Adam(params, lr=0.001)
 num_epochs = 5
 
 # encoder.load_state_dict(torch.load('./encoder.tar'))
