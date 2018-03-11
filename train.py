@@ -31,7 +31,7 @@ dataset_size = 16
 
 annIds = get_ann_ids()
 imgIds = get_image_ids()
-train_ids, val_ids = get_test_train_split(annIds,percentage=0.1)
+train_ids, val_ids = get_test_train_split(annIds,percentage=0.05)
 
 logger.warning("Loading Dataset")
 word_model = WordModel()
@@ -163,7 +163,7 @@ for epoch in range(num_epochs):
         images,captions,lengths = data
        
         if use_cuda:
-            images,captions = Variable(images.cuda()),Variable(captions.cuda())
+            images,captions = Variable(images.cuda(),volatile=True),Variable(captions.cuda())
         else:
             images,captions = Variable(images),Variable(captions)
         

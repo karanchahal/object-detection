@@ -57,7 +57,7 @@ class CocoDataset(Dataset):
 
         # Create caption as list of ids
         caption = self.word_model.parse(caption)
-
+        
         # Create image
         image = torch.Tensor(np.zeros((3,224,224)))
         try:
