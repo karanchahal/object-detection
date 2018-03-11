@@ -40,5 +40,5 @@ class Decoder(nn.Module):
             sampled_ids.append(predicted)
             inputs = self.embed(predicted)
             inputs = inputs.unsqueeze(1)                         # (batch_size, 1, embed_size)
-        sampled_ids = torch.cat(sampled_ids, 1)                  # (batch_size, 20)
+        sampled_ids = torch.cat(sampled_ids, 0)                  # (batch_size, 20)
         return sampled_ids.squeeze()

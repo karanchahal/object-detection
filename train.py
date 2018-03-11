@@ -131,8 +131,8 @@ print('Number of examples', word_model.vocab.examples)
 print('Number of words', len(word_model.vocab.id2word))
 
 logger.warning("Loading the model")
-conv = resnet34(pretrained=True)
-encoder = Encoder(conv)
+
+encoder = Encoder()
 decoder = Decoder(vocab_size=word_model.vocab.length())
 
 logger.info('CUDA is ' + str(use_cuda))
@@ -143,7 +143,7 @@ if use_cuda:
 criterion = nn.CrossEntropyLoss()
 params = list(decoder.parameters()) + list(encoder.linear.parameters()) + list(encoder.bn.parameters())
 optimizer = torch.optim.Adam(params, lr=0.001)
-num_epochs = 5
+num_epochs = 2
 
 # encoder.load_state_dict(torch.load('./encoder.tar'))
 # decoder.load_state_dict(torch.load('./decoder.tar'))

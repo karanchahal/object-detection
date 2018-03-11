@@ -28,13 +28,13 @@ logger = logging.getLogger(__name__)
 
 use_cuda = torch.cuda.is_available()
 
-batch_size = 4
+batch_size = 1
 dataset_size = 16
 
 
 annIds = get_ann_ids()
 imgIds = get_image_ids()
-train_ids, val_ids = get_test_train_split(annIds,percentage=0.99)
+train_ids, val_ids = get_test_train_split(annIds,percentage=0.1)
 
 logger.warning("Loading Dataset")
 word_model = WordModel()
@@ -44,6 +44,8 @@ image_transform = transforms.Compose([
         Rescale(250),
         RandomCrop(224),
         transforms.ToTensor(),
+        transforms.Normalize((0.485, 0.456, 0.406), 
+                             (0.229, 0.224, 0.225))
     ])
 train_dataset = CocoDataset(annIds=train_ids,
                     coco=coco,
@@ -82,10 +84,10 @@ def evaluate(encoder,decoder,val_dataloader):
     
     running_loss = 0.0
     running_score = 0.0
-    num_examples = len(val_dataloader)
+    num_examples = len(train_dataloader)
     print(num_examples)
 
-    for i,data in enumerate(val_dataloader):
+    for i,data in enumerate(train_dataloader):
         images,captions,lengths = data
 
         if use_cuda:
@@ -95,26 +97,27 @@ def evaluate(encoder,decoder,val_dataloader):
         
         targets,pad_lengths = pack_padded_sequence(captions,lengths,batch_first=True)
 
-        
         decoder.zero_grad()
         encoder.zero_grad()
-        # image = io.imread('ayo_tempest.jpg')
-        # image = image_transform(image)
-        # image = image.numpy()
-        # print(image)
-        # viewer = ImageViewer(image)
-        # viewer.show()
-
         
-       
+
+        # features = encoder(images)
+        # ids = decoder(features)
+
         features = encoder(images)
         outputs = decoder(features,captions,lengths)
-        loss = criterion(outputs,targets)
+
         targets = pad_packed_sequence((targets,pad_lengths),batch_first=True)[0]
         outputs = pad_packed_sequence((outputs,pad_lengths),batch_first=True)[0]
 
         _, outputs = outputs.data.topk(1)
-        outputs = torch.squeeze(outputs)
+        outputs = torch.squeeze(outputs,2)
+        
+        print(outputs)
+        print(targets)
+
+        print(targets.size())
+        print(outputs.size())
         if use_cuda:
             targets_in_sentence = word_model.to_sentence(targets.data.cpu().numpy())
             outputs_in_sentence = word_model.to_sentence(outputs.cpu().numpy())
@@ -124,14 +127,23 @@ def evaluate(encoder,decoder,val_dataloader):
         
         img = images.data.cpu().numpy()
         # misc.imshow(img[0])
-        # print(targets_in_sentence[0])
-        # print(outputs_in_sentence[0])
-        score = bleu(targets_in_sentence, outputs_in_sentence)
-        print(loss.data[0])
-        running_score += float(score/num_examples)
-        running_loss += float(loss.data[0]/num_examples)
+        print(targets_in_sentence[0])
+        print(outputs_in_sentence[0])
+
+        break
+
+        # print(word_model.to_sentence_from_ids(ids.cpu().data))
+        # image = io.imread('ayo_tempest.jpg')
+        # image = image_transform(images)
+        # image = image.numpy()
+        # print(image)
+        # viewer = ImageViewer(image)
+        # viewer.show()
+
     
-    logger.warning("The bleu score is " + str(running_score) + " and loss is " + str(running_loss))
+       
+    
+    # logger.warning("The bleu score is " + str(running_score) + " and loss is " + str(running_loss))
 
 def sample(encoder,decoder,filepaths):
     
@@ -144,7 +156,8 @@ def sample(encoder,decoder,filepaths):
         features = encoder(image)
         print(features.size())
         ids = decoder.sample(features)
-        print(word_model.to_sentence_from_ids(ids))
+        
+        print(word_model.to_sentence_from_ids(ids.cpu().data))
 
         
 
@@ -154,7 +167,7 @@ print('Number of words', len(word_model.vocab.id2word))
 logger.warning("Loading the model")
 conv = resnet34(pretrained=True)
 encoder = Encoder(conv)
-decoder = Decoder(vocab_size=word_model.vocab.length(),batch_size=batch_size)
+decoder = Decoder(vocab_size=word_model.vocab.length())
 
 logger.info('CUDA is ' + str(use_cuda))
 
@@ -162,13 +175,8 @@ if use_cuda:
     encoder = encoder.cuda()
     decoder = decoder.cuda()
 
-criterion = nn.CrossEntropyLoss()
-params = list(decoder.parameters()) + list(encoder.parameters())
-optimizer = torch.optim.Adam(params, lr=0.001)
-num_epochs = 7
-
-# encoder.load_state_dict(torch.load('./encoder.tar'))
-# decoder.load_state_dict(torch.load('./decoder.tar'))
-
+encoder.load_state_dict(torch.load('./encoder.tar'))
+decoder.load_state_dict(torch.load('./decoder.tar'))
+encoder.eval()
 evaluate(encoder,decoder,train_dataloader)
 # sample(encoder,decoder,filepaths=['test2.jpg','test3.jpg'])
