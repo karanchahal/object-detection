@@ -32,7 +32,7 @@ dataset_size = 16
 annIds = get_ann_ids()
 imgIds = get_image_ids()
 train_ids, val_ids = get_test_train_split(annIds,percentage=0.05)
-
+train_ids = train_ids[:1000]
 logger.warning("Loading Dataset")
 word_model = WordModel()
 word_model.load(filename="model_logs/word_model.pkl")
