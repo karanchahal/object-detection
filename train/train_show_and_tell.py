@@ -15,7 +15,7 @@ import torch.nn as nn
 import numpy as np
 # logging settings
 
-
+''' Need to paste it in root and run , also data loader needs to be configured in show and tell settings'''
 
 # Create a logger object.
 logger = logging.getLogger(__name__)
@@ -132,7 +132,7 @@ for epoch in range(num_epochs):
         loss.backward()
         optimizer.step()
     
-    # evaluate(encoder,decoder,val_dataloader)
+    
     torch.save(encoder.state_dict(), 'encoder.tar')
     torch.save(decoder.state_dict(),'decoder.tar')
 

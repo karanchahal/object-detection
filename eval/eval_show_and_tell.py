@@ -17,6 +17,8 @@ from skimage import io, transform
 from skimage.viewer import ImageViewer
 # logging settings
 
+''' Need to paste it in root and run , also data loader needs to be configured in show and tell settings'''
+
 
 def bleu(reference,candidate):
     cc = SmoothingFunction()
@@ -121,19 +123,10 @@ def evaluate(encoder,decoder,val_dataloader):
             outputs_in_sentence = word_model.to_sentence(outputs.numpy())
         
         img = images.data.cpu().numpy()
-        # misc.imshow(img[0])
         print(targets_in_sentence[0])
         print(outputs_in_sentence[0])
 
         break
-
-        # print(word_model.to_sentence_from_ids(ids.cpu().data))
-        # image = io.imread('ayo_tempest.jpg')
-        # image = image_transform(images)
-        # image = image.numpy()
-        # print(image)
-        # viewer = ImageViewer(image)
-        # viewer.show()
 
     
        

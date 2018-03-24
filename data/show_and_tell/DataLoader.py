@@ -151,7 +151,7 @@ class Rescale(object):
 
         new_h, new_w = int(new_h), int(new_w)
 
-        image = transform.resize(image, (new_h, new_w))
+        image = transform.resize(image, (new_h, new_w),mode='reflect')
 
         
         return image
