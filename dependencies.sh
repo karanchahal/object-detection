@@ -18,5 +18,5 @@ ls
 echo 'Some file folder modifications'
 mkdir errors
 echo 'Installed all dependencies'
-#hey
+
 
