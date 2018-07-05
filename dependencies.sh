@@ -12,7 +12,7 @@ git clone https://github.com/cocodataset/cocoapi.git
 cd cocoapi/PythonAPI
 make
 make install
-python setup.py install
+python3 setup.py install
 cd ../.././
 ls
 echo 'Some file folder modifications'
