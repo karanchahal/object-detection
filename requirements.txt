@@ -7,3 +7,5 @@ cython
 coloredlogs
 scipy
 pyqt5
+Pillow==4.0.0
+image
