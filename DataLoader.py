@@ -12,7 +12,7 @@ from skimage.viewer import ImageViewer
 from data.show_and_tell.dataset import get_image_ids,coco,coco_caps,get_ann_ids,get_test_train_split
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-from data.rpn.anchors import generateAnchors
+from anchors import generateAnchors,plotBoundingBoxes
 logger = logging.getLogger(__name__)
 
 PROJECT_DIR = './'
@@ -81,17 +81,8 @@ def visualiseDataSet():
     
     batch_size = 1
     imgIds = get_image_ids()
-    train_ids, val_ids = get_test_train_split(imgIds,percentage=0.05)
+    train_ids, _ = get_test_train_split(imgIds,percentage=0.05)
     train_ids = train_ids[:10]
-    
-    # image_transform = transforms.Compose([
-    #     Rescale(250),
-    #     RandomCrop(224),
-    #     transforms.ToTensor(),
-    #     transforms.Normalize((0.485, 0.456, 0.406), 
-    #                          (0.229, 0.224, 0.225))
-    # ])
-    
   
     train_dataset = CocoDatasetObjectDetection(
                     imgIds=train_ids,
@@ -106,55 +97,53 @@ def visualiseDataSet():
                 )
 
     for i,img_nodes in enumerate(train_dataloader):
-        
-        # get bounding box coords
+        print(len(img_nodes))
         for img_node in img_nodes:
-            # try:
                 
-            I = io.imread(img_node['coco_url'])
-            w = img_node['width']
-            h = img_node['height']
-            print(w)
-            print(h)
-            anchors = generateAnchors(w,h,30)
+            image = io.imread(img_node['coco_url'])
+            plotBoundingBoxes(image,img_node['id'])
+            # w = img_node['width']
+            # h = img_node['height']
+           
+            # anchors = generateAnchors(w,h,30)
+            # plotAnchors(I,anchors)
+            # # Create figure and axes
+            # fig,ax = plt.subplots(1)
+            # plt.axis('off')
 
-            # Create figure and axes
-            fig,ax = plt.subplots(1)
-            plt.axis('off')
+            # # load image
+            # plt.imshow(I)
+            # print(img_node)
+            # coordsList,classList = getBoundingBoxCoords(img_node['id'])
 
-            # load image
-            plt.imshow(I)
-            print(img_node)
-            coordsList,classList = getBoundingBoxCoords(img_node['id'])
-
-            # visualise example
-            colors = ['r','g','b']
-            i = 0
-            for i,bbox in enumerate(coordsList):
-                rect = patches.Rectangle((bbox[0],bbox[1]),bbox[2],bbox[3],linewidth=2,edgecolor=colors[i%(len(colors)-1)],facecolor='none')
-                # Add the patch to the Axes
+            # # visualise example
+            # colors = ['r','g','b']
+            # i = 0
+            # for i,bbox in enumerate(coordsList):
+            #     rect = patches.Rectangle((bbox[0],bbox[1]),bbox[2],bbox[3],linewidth=2,edgecolor=colors[i%(len(colors)-1)],facecolor='none')
+            #     # Add the patch to the Axes
                 
-                hey = coco.dataset
-                key = int(classList[i])-1
-                print("Class for object of colour " + colors[i%(len(colors)-1)]+ " is ",coco.dataset['categories'][key]['name'])
-                ax.add_patch(rect)
+            #     hey = coco.dataset
+            #     key = int(classList[i])-1
+            #     print("Class for object of colour " + colors[i%(len(colors)-1)]+ " is ",coco.dataset['categories'][key]['name'])
+            #     ax.add_patch(rect)
 
-                i+=1
+            #     i+=1
 
-            plt.show()
+            # plt.show()
 
-                # for anchor in anchors[:]:
-                #     x_center = anchor[0] - (anchor[2]/2)
-                #     y_center = anchor[1] - (anchor[3]/2)
-                #     rect = patches.Rectangle((anchor[0],anchor[1]),10,10,linewidth=1,edgecolor='r',facecolor='none')
-                #     # Add the patch to the Axes
-                #     ax.add_patch(rect)
-                    # x_center = anchor[0] - (anchor[2]/2)
-                    # y_center = anchor[1] - (anchor[3]/2)
+            #     # for anchor in anchors[:]:
+            #     #     x_center = anchor[0] - (anchor[2]/2)
+            #     #     y_center = anchor[1] - (anchor[3]/2)
+            #     #     rect = patches.Rectangle((anchor[0],anchor[1]),10,10,linewidth=1,edgecolor='r',facecolor='none')
+            #     #     # Add the patch to the Axes
+            #     #     ax.add_patch(rect)
+            #         # x_center = anchor[0] - (anchor[2]/2)
+            #         # y_center = anchor[1] - (anchor[3]/2)
                 
-                    # rect = patches.Rectangle((x_center,y_center),anchor[2],anchor[3],linewidth=1,edgecolor='r',facecolor='none')
-                    # # Add the patch to the Axes
-                    # ax.add_patch(rect)
+            #         # rect = patches.Rectangle((x_center,y_center),anchor[2],anchor[3],linewidth=1,edgecolor='r',facecolor='none')
+            #         # # Add the patch to the Axes
+            #         # ax.add_patch(rect)
                 
             # except:
             #     logger.warning("Invalid bbox coordinates")

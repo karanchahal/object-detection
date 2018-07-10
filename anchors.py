@@ -1,3 +1,8 @@
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import pycocotools as pycoco
+from data.show_and_tell.dataset import coco
+
 def getAnchorsForPixelPoint(i,j,width,height):
     ''' 
      Generates 9 anchors for a single pixel point. Each anchor has 4 coordinates.
@@ -66,4 +71,47 @@ def generateAnchors(width,height,compressionFactor):
     return anchors
 
 
-generateAnchors("12",1,1)
+def getBoundingBoxCoords(id):
+    ''' This function returns the bounding box coordinates of an image id'''
+    annIds = coco.getAnnIds(imgIds=id, iscrowd=None)
+    anns = coco.loadAnns(annIds)
+    coordsList = []
+    classList = []
+    for a in anns:
+        coordsList.append(a['bbox'])
+        classList.append(a['category_id'])
+    
+    return coordsList,classList
+        
+
+def plotAnchors(image,anchors,compressionFactor=16):
+    print("TODO")
+
+def plotBoundingBoxes(image,image_id,compressionFactor=16):
+    ''' 
+        TODO
+    '''
+    fig,ax = plt.subplots(1)
+    plt.axis('off')
+
+    # load image
+    plt.imshow(image)
+    coordsList,categoryList = getBoundingBoxCoords(image_id)
+
+    # visualise example
+    colors = ['g','b']
+
+    i = 0
+    for i,bbox in enumerate(coordsList):
+        rect = patches.Rectangle((bbox[0],bbox[1]),bbox[2],bbox[3],linewidth=2,edgecolor=colors[i%(len(colors)-1)],facecolor='none')
+        # Add the patch to the Axes
+        categoryKey = int(categoryList[i])-1
+        name = coco.dataset['categories'][categoryKey]['name']
+        text = plt.text(bbox[0],bbox[1], name, bbox=dict(facecolor='red', alpha=0.5))
+        categoryKey = int(categoryList[i])-1
+        print("Class for object of colour " + colors[i%(len(colors)-1)]+ " is ",coco.dataset['categories'][categoryKey]['name'])
+        ax.add_patch(rect)
+
+        i+=1
+
+    plt.show()
