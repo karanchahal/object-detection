@@ -1,4 +1,6 @@
 import os
+import cv2
+import urllib
 import torch
 from torchvision import transforms, utils
 from torch.utils.data import Dataset, DataLoader
@@ -13,6 +15,7 @@ from data.show_and_tell.dataset import get_image_ids,coco,coco_caps,get_ann_ids,
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import json
+from PIL import Image
 logger = logging.getLogger(__name__)
 
 
@@ -60,23 +63,68 @@ def collate_fn(data):
     ''' input: image nodes
         output: images tensor of shape (3,224,224), captions of padded length,lengths
     '''
-#     data.sort(key=lambda x: len(x[1]), reverse=True)
     
     return data
+
+
+
+
+def retrieveImage(path):
+  '''
   
+  Gets an image using OpenCV given the file path.
+  Arguments
+    1. URL/PATH : (string) - The path of the file, can also be a URL
+  Returns 
+    1. image - (numpy array) - The image in RGB format as numpy array of floats normalized to range between 0.0 - 1.0
   
-def getBoundingBoxCoords(id):
-    ''' This function returns the bounding box coordinates of an image id'''
-    annIds = coco.getAnnIds(imgIds=id, iscrowd=None)
-    anns = coco.loadAnns(annIds)
-    coordsList = []
-    classList = []
-    for a in anns:
-        coordsList.append(a['bbox'])
-        classList.append(a['category_id'])
+  '''
+  
+  assert(isinstance(path,str)), "The URL should be of type string, you are passing a type %s in the retrieveImage function"%(type(path))
+
+  flags = cv2.IMREAD_UNCHANGED+cv2.IMREAD_ANYDEPTH+cv2.IMREAD_ANYCOLOR
+  if not os.path.exists(path) and not str(path).startswith("http"):
+      raise OSError('No such file or directory: {}'.format(path))
+  elif os.path.isdir(path) and not str(path).startswith("http"):
+      raise OSError('Is a directory: {}'.format(path))
+  else:
+      try:
+          if str(path).startswith("http"):
+              req = urllib.request.urlopen(str(path))
+              image = np.asarray(bytearray(req.read()), dtype="uint8")
+              im = cv2.imdecode(image, flags).astype(np.float32)/255
+          else:
+              im = cv2.imread(str(path), flags).astype(np.float32)/255
+          if im is None: raise OSError(f'File not recognized by opencv: {path}')
+          return cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+      except Exception as e:
+          raise OSError('Error handling image at: {}'.format(path)) from e
+          
+
+def resizeImage(image,size):
+  '''
+  TODO
+  '''
+  
+  h,w,_ = image.shape
+  ratio = float(h/w)
+  
+  if min(h,w) >= size:
+    interpolation = cv2.INTER_AREA
+  else:
+    interpolation = cv2.INTER_LINEAR 
     
-    return coordsList,classList
-        
+  if w == min(h,w):
+    target_height = int(ratio*size)
+    return cv2.resize(image,(size,target_height), interpolation=interpolation)
+  else: 
+    target_width = int(size/ratio)
+    return cv2.resize(image,(target_width,size),interpolation=interpolation)
+
+def displayImage(image):
+    plt.axis('off')
+    plt.imshow(image)
+    plt.show()
   
 def visualiseDataSet():
     
@@ -99,8 +147,13 @@ def visualiseDataSet():
 
     for i,img_nodes in enumerate(train_dataloader):
         for img_node in img_nodes:
-            image = io.imread(img_node['coco_url'])
-            plotBiggestBoundingBox(image,img_node['id'])
-    
+          image = retrieveImage(img_node['coco_url'])
+          old_h,old_w,_ = image.shape
+          image = resizeImage(image,224)
+          new_h,new_w,_ = image.shape
+          width_offset = float(new_w/old_w)
+          height_offset = float(new_h/old_h)
+          plotAllBoundingBoxes(image,img_node['id'], width_offset,height_offset)
+
 
 visualiseDataSet()
