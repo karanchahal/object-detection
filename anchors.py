@@ -86,7 +86,7 @@ def retrieveBoundingBoxCoords(image_id):
           
     '''
     
-    assert(isinstance(image_id,int)), "Image id should be of type int, you are passing a type %s in the retrieveBoundingBoxCoords Function".format(type(image_id))
+    assert(isinstance(image_id,int)), "Image id should be of type int, you are passing a type %s in the retrieveBoundingBoxCoords Function"%(type(image_id))
     
     coordsList = []
     categoryList = []
@@ -94,9 +94,8 @@ def retrieveBoundingBoxCoords(image_id):
     try:
       annIds = coco.getAnnIds(imgIds=image_id, iscrowd=None)
       anns = coco.loadAnns(annIds)
-      print(json.dumps(anns, indent=4))
       for a in anns:
-          coordsList.append(a['bbox'])
+          coordsList.append([int(i) for i in a['bbox']])
           categoryList.append(a['category_id'])
     except:
       AssertionError("The id is not valid !")
@@ -135,7 +134,7 @@ def retrieveLargestBoundingBox(image_id):
         2. category_id : (int) - The category of the bounding box. (apple, person,car etc )
     '''
     
-    assert(isinstance(image_id,int)), "Image id should be of type int, you are passing a type %s in the retrieveLargestBoundingBox Function".format(type(image_id))
+    assert(isinstance(image_id,int)), "Image id should be of type int, you are passing a type %s in the retrieveLargestBoundingBox Function"%(type(image_id))
     
     index = -1
     max_area = 0
@@ -168,9 +167,6 @@ def plotBoundingBoxWithText(plt,ax,bbox,category):
         Returns:
           None
     '''
-    # add assertions
-    assert(isinstance(plt,matpltlib.pyplot)), ""
-    assert(isinstance(ax,matpltlib.pyplot)), ""
     assert(isinstance(bbox,list)), "The bounding box should be of type list"
     assert(len(bbox) == 4),"The length of the bounding box should 4 for the four coordainates x,y,height and width"
     assert(isinstance(bbox[0],int)), "The bbox should contain int elements only"
@@ -189,18 +185,22 @@ def plotBoundingBoxWithText(plt,ax,bbox,category):
     drawOutline(patch)
     drawOutline(text)
 
-def plotAllBoundingBoxes(image,image_id):
+def plotAllBoundingBoxes(image,image_id,width_offset,height_offset):
     '''
       Plots the bounding box coordinates and the category of the LARGEST Bounding Box in the image of the COCO Dataset
       Arguments: 
         1. image_id (int) - Image Id of COCO Image
         2. image (numpy.ndarray) - The actual image in a numpy format
+        3. width_offset (float) - Offset to width of the actual image buy the resized image, that is resized to be input into model
+        4. height_offset (float) - Offset to height of the actual image buy the resized image, that is resized to be input into model
       Returns:
         Nothing
     '''
-    assert(isinstance(image,numpy.ndarray)), "Image should be a type numpy array, you are passing a type %s in the plotBoundingBoxes Function".format(type(image))
-    assert(isinstance(image_id,int)), "Image id should be of type int, you are passing a type %s in the plotBoundingBoxes Function".format(type(image_id))
-#     assert(isinstance(compressionFactor,int)), "Compression Factor should be of type int, you are passing a type %s in the plotBoundingBoxes Function".format(type(compressionFactor))
+    
+    assert(isinstance(image,numpy.ndarray)), "Image should be a type numpy array, you are passing a type %s in the plotBoundingBoxes Function"%(type(image))
+    assert(isinstance(image_id,int)), "Image id should be of type int, you are passing a type %s in the plotBoundingBoxes Function"%(type(image_id))
+    assert(isinstance(width_offset,float)), "Width offset should be of type float, you are passing a type %s in the plotAllBoundingBoxes Function"%(type(width_offset))
+    assert(isinstance(height_offset,float)), "Height offset should be of type float, you are passing a type %s in the plotAllBoundingBoxes Function"%(type(height_offset))
     
     fig,ax = plt.subplots(1)
     plt.axis('off')
@@ -210,30 +210,67 @@ def plotAllBoundingBoxes(image,image_id):
     coordsList,categoryList = retrieveBoundingBoxCoords(image_id)
 
     for i,bbox in enumerate(coordsList):
-        plotBoundingBoxWithText(plt,ax,image,bbox,categoryList[i])
+        bbox = addOffsetsToBoundingBox(bbox,width_offset,height_offset)
+        plotBoundingBoxWithText(plt,ax,bbox,categoryList[i])
         
     plt.show()
+
+def addOffsetsToBoundingBox(bbox,width_offset,height_offset):
+    '''
+      Modifies bounding box coordinates so that they remain consistent with resized image
+      Arguments:
+        1. width_offset (float) - Offset to width of the actual image buy the resized image, that is resized to be input into model
+        2. height_offset (float) - Offset to height of the actual image buy the resized image, that is resized to be input into model
+        3. [int,int,int,int] - Bounding box coordinate. The 4 ints represent
+              a. Top left x,y coordinate
+              b. Height and Width
+              
+        Returns
+        1. Modified bounding Box coordinates
+             [int,int,int,int] - Bounding box coordinate. The 4 ints represent
+                a. Top left x,y coordinate
+                b. Height and Width
+      
+    '''
+    assert(isinstance(bbox,list)), "The bounding box should be of type list"
+    assert(len(bbox) == 4),"The length of the bounding box should 4 for the four coordainates x,y,height and width"
+    assert(isinstance(bbox[0],int)), "The bbox should contain int elements only"
+    assert(isinstance(width_offset,float)), "Width offset should be of type float, you are passing a type %s in the addOffsetsToBoundingBox Function"%(type(width_offset))
+    assert(isinstance(height_offset,float)), "Height offset should be of type float, you are passing a type %s in the addOffsetsToBoundingBox Function"%(type(height_offset))
     
-def plotBiggestBoundingBox(image,image_id):
+    bbox[0] = int(bbox[0]*width_offset)
+    bbox[1] = int(bbox[1]*height_offset)
+    
+    bbox[2] = int(bbox[2]*width_offset)
+    bbox[3] = int(bbox[3]*height_offset)
+    
+    return bbox
+  
+def plotBiggestBoundingBox(image,image_id,width_offset,height_offset):
     '''
       Plots the image with the bounding box coordinates and the category of the LARGEST Bounding Box in the image of the COCO Dataset using Matplotlib
       Arguments: 
         
         1. image_id (int) - Image Id of COCO Image
         2. image (numpy.ndarray) - The actual image in a numpy format
+        3. width_offset (float) - Offset to width of the actual image buy the resized image, that is resized to be input into model
+        4. height_offset (float) - Offset to height of the actual image buy the resized image, that is resized to be input into model
       Returns:
         Nothing
     '''
-    assert(isinstance(image,numpy.ndarray)), "Image should be a type numpy array, you are passing a type %s in the plotBoundingBoxes Function".format(type(image))
-    assert(isinstance(image_id,int)), "Image id should be of type int, you are passing a type %s in the plotBoundingBoxes Function".format(type(image_id))
-#     assert(isinstance(compressionFactor,int)), "Compression Factor should be of type int, you are passing a type %s in the plotBoundingBoxes Function".format(type(compressionFactor))
-    
+    assert(isinstance(image,numpy.ndarray)), "Image should be a type numpy array, you are passing a type %s in the plotBiggestBoundingBox Function"%(type(image))
+    assert(isinstance(image_id,int)), "Image id should be of type int, you are passing a type %s in the plotBiggestBoundingBox Function"%(type(image_id))
+    assert(isinstance(width_offset,float)), "Width offset should be of type float, you are passing a type %s in the plotBiggestBoundingBox Function"%(type(width_offset))
+    assert(isinstance(height_offset,float)), "Height offset should be of type float, you are passing a type %s in the plotBiggestBoundingBox Function"%(type(height_offset))
     fig,ax = plt.subplots(1,frameon=False)
     plt.axis('off')
 
     plt.imshow(image)
     
     bbox,category = retrieveLargestBoundingBox(image_id)
+    
+    bbox = addOffsetsToBoundingBox(bbox,width_offset,height_offset)
+    
     plotBoundingBoxWithText(plt,ax,bbox,category)
     
     plt.show()
