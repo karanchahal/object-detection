@@ -145,7 +145,7 @@ def calculateOffsets(anchor,ob):
         2. Ground truth object: ([int,int,int,int]) : The top left x,y 
             coordinate and width and height.
       Returns
-        1. offsets: ([int,int,int,int]) : The offsets for top left x,y 
+        1. offsets: ([[float,float,float,float]]) : The offsets for top left x,y 
         coordinate and width and height. 
     '''
     
