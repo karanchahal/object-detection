@@ -9,7 +9,7 @@ class TestAnchors(unittest.TestCase):
         self.assertTrue('FOO'.isupper())
         self.assertFalse('Foo'.isupper())
 
-    def test_anchors(self):
+    def test_anchor_generation(self):
         s = 'hello world'
         self.assertEqual(s.split(), ['hello', 'world'])
         # check that s.split fails when the separator is not a string
