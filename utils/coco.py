@@ -38,7 +38,7 @@ def get_ann_ids(sample=None):
         return annIds
     else:
         # Returning a subset of the dataset
-        return ann_ids[:sample]
+        return annIds[:sample]
 
 def get_image_ids(sample=None):
     logger.warning("Generating image ids")

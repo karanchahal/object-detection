@@ -1,5 +1,5 @@
-# attention-caption
-Attention only Caption Model
+# Object Detection 
+Object Detection Toolkit that reproduces state of the art results.
 
 ## Running
 
