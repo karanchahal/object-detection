@@ -12,5 +12,5 @@ decoder.tar
 *.gz
 *.vectors
 .vscode/
-*/*/__pycache__
+*/*__pycache__
 __pycache__

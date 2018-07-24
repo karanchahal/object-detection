@@ -1,11 +1,11 @@
-http://download.pytorch.org/whl/cu80/torch-0.2.0.post3-cp36-cp36m-manylinux1_x86_64.whl
+# deep learning library
+torch==0.4.0
 torchvision
-nltk==3.2.5
-gensim
+# for data manipulation
 numpy
+# for the coco installation
 cython
+# for logging
 coloredlogs
-scipy
-pyqt5
-Pillow==4.0.0
-image
+# images
+opencv
