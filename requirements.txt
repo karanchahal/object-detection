@@ -1,5 +1,5 @@
 # deep learning library
-torch==0.4.0
+torch
 torchvision
 # for data manipulation
 numpy
